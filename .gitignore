@@ -1,2 +1,6 @@
 # Log Files
 *.log
+# Compiled python
+*.pyc
+# Compiled python
+tags

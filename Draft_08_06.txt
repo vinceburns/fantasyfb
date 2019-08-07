@@ -1,0 +1,359 @@
+23:21:18 | Round:1 Pick:1 Total Pick: 2
+23:21:18 | comp1 selected Saquon Barkley
+23:21:18 | Round:1 Pick:2 Total Pick: 3
+23:21:18 | comp2 selected Ezekiel Elliott
+23:21:18 | Round:1 Pick:3 Total Pick: 4
+23:21:18 | comp3 selected Alvin Kamara
+23:21:18 | Round:1 Pick:4 Total Pick: 5
+23:21:18 | comp4 selected Christian McCaffrey
+23:21:18 | Round:1 Pick:5 Total Pick: 6
+23:21:18 | Your Turn!
+23:21:18 | Sorry, could not find that pattern in any player's names.
+23:21:18 | Please Try again
+23:22:33 | Round:1 Pick:1 Total Pick: 1
+23:22:33 | comp1 selected Saquon Barkley
+23:22:33 | Round:1 Pick:2 Total Pick: 2
+23:22:33 | comp2 selected Ezekiel Elliott
+23:22:33 | Round:1 Pick:3 Total Pick: 3
+23:22:33 | comp3 selected Alvin Kamara
+23:22:33 | Round:1 Pick:4 Total Pick: 4
+23:22:33 | comp4 selected Christian McCaffrey
+23:22:33 | Round:1 Pick:5 Total Pick: 5
+23:22:33 | Your Turn!
+23:22:33 | Please Enter correct number for the player you would like to draft
+23:22:33 | Number | Name |
+23:22:33 | 1: | David Johnson
+23:22:33 | 2: | David Montgomery
+23:22:33 | 3: | David Njoku
+23:22:33 | 4: | David Moore
+23:22:33 | Vince selected David Johnson
+23:22:33 | fill_in
+23:22:33 | found rb at0
+23:22:33 | starting rb1 at0
+23:22:33 | print_roster
+23:22:33 | Team:Vince
+23:22:33 | Ros    | Name          | Pos | Rank | Team | Pick | Ovrall |
+23:23:42 | Round:1 Pick:1 Total Pick: 1
+23:23:42 | comp1 selected Saquon Barkley
+23:23:42 | Round:1 Pick:2 Total Pick: 2
+23:23:42 | comp2 selected Ezekiel Elliott
+23:23:42 | Round:1 Pick:3 Total Pick: 3
+23:23:42 | comp3 selected Alvin Kamara
+23:23:42 | Round:1 Pick:4 Total Pick: 4
+23:23:42 | comp4 selected Christian McCaffrey
+23:23:42 | Round:1 Pick:5 Total Pick: 5
+23:23:42 | Your Turn!
+23:23:42 | Please Enter correct number for the player you would like to draft
+23:23:42 | Number | Name |
+23:23:42 | 1: | David Johnson
+23:23:42 | 2: | David Montgomery
+23:23:42 | 3: | David Njoku
+23:23:42 | 4: | David Moore
+23:23:42 | Vince selected David Johnson
+23:23:42 | fill_in
+23:23:42 | found rb at0
+23:23:42 | starting rb1 at0
+23:23:42 | print_roster
+23:23:42 | Team:Vince
+23:23:42 | Ros    | Name          | Pos | Rank | Team | Pick | Ovrall |
+23:23:42 | QB:    | empty
+23:23:42 | RB1:   | David Johnson | RB  | 005  | ARI  | 001  | 005    |
+23:23:42 | RB2:   | empty
+23:23:42 | WR1:   | empty
+23:23:42 | WR2:   | empty
+23:23:42 | TE:    | empty
+23:23:42 | FLEX:  | empty
+23:23:42 | DST:   | empty
+23:23:42 | K:     | empty
+23:23:42 | BENCH: | empty
+23:23:42 | BENCH: | empty
+23:23:42 | BENCH: | empty
+23:23:42 | BENCH: | empty
+23:23:42 | BENCH: | empty
+23:23:42 | BENCH: | empty
+23:23:42 | BENCH: | empty
+23:23:42 | Round:1 Pick:6 Total Pick: 6
+23:23:42 | comp6 selected DeAndre Hopkins
+23:23:42 | Round:1 Pick:7 Total Pick: 7
+23:23:42 | comp7 selected Davante Adams
+23:23:42 | Round:1 Pick:8 Total Pick: 8
+23:25:39 | Round:1 Pick:1 Total Pick: 1
+23:25:39 | comp1 selected Saquon Barkley
+23:25:39 | Round:1 Pick:2 Total Pick: 2
+23:25:39 | comp2 selected Ezekiel Elliott
+23:25:39 | Round:1 Pick:3 Total Pick: 3
+23:25:39 | comp3 selected Alvin Kamara
+23:25:39 | Round:1 Pick:4 Total Pick: 4
+23:25:39 | comp4 selected Christian McCaffrey
+23:25:39 | Round:1 Pick:5 Total Pick: 5
+23:25:39 | Your Turn!
+23:25:39 | Please Enter correct number for the player you would like to draft
+23:25:39 | Number | Name |
+23:25:39 | 1: | David Johnson
+23:25:39 | 2: | David Montgomery
+23:25:39 | 3: | David Njoku
+23:25:39 | 4: | David Moore
+23:25:39 | Vince selected David Johnson
+23:25:39 | fill_in
+23:25:39 | found rb at0
+23:25:39 | starting rb1 at0
+23:25:39 | print_roster
+23:25:39 | Team:Vince
+23:25:39 | Ros    | Name          | Pos | Rank | Team | Pick | Ovrall |
+23:25:39 | QB:    | empty
+23:25:39 | RB1:   | David Johnson | RB  | 005  | ARI  | 001  | 005    |
+23:25:39 | RB2:   | empty
+23:25:39 | WR1:   | empty
+23:25:39 | WR2:   | empty
+23:25:39 | TE:    | empty
+23:25:39 | FLEX:  | empty
+23:25:39 | DST:   | empty
+23:25:39 | K:     | empty
+23:25:39 | BENCH: | empty
+23:25:39 | BENCH: | empty
+23:25:39 | BENCH: | empty
+23:25:39 | BENCH: | empty
+23:25:39 | BENCH: | empty
+23:25:39 | BENCH: | empty
+23:25:39 | BENCH: | empty
+23:25:39 | Round:1 Pick:6 Total Pick: 6
+23:25:39 | comp6 selected DeAndre Hopkins
+23:25:39 | Round:1 Pick:7 Total Pick: 7
+23:25:39 | comp7 selected Davante Adams
+23:25:39 | Round:1 Pick:8 Total Pick: 8
+23:26:45 | Round:1 Pick:1 Total Pick: 1
+23:26:45 | comp1 selected Saquon Barkley
+23:26:45 | Round:1 Pick:2 Total Pick: 2
+23:26:45 | comp2 selected Ezekiel Elliott
+23:26:45 | Round:1 Pick:3 Total Pick: 3
+23:26:45 | comp3 selected Alvin Kamara
+23:26:45 | Round:1 Pick:4 Total Pick: 4
+23:26:45 | comp4 selected Christian McCaffrey
+23:26:45 | Round:1 Pick:5 Total Pick: 5
+23:26:45 | Your Turn!
+23:26:45 | Please Enter correct number for the player you would like to draft
+23:26:45 | Number | Name |
+23:26:45 | 1: | David Johnson
+23:26:45 | 2: | David Montgomery
+23:26:45 | 3: | David Njoku
+23:26:45 | 4: | David Moore
+23:26:45 | Vince selected David Johnson
+23:26:45 | fill_in
+23:26:45 | found rb at0
+23:26:45 | starting rb1 at0
+23:26:45 | print_roster
+23:26:45 | Team:Vince
+23:26:45 | Ros    | Name          | Pos | Rank | Team | Pick | Ovrall |
+23:26:45 | QB:    | empty
+23:26:45 | RB1:   | David Johnson | RB  | 005  | ARI  | 001  | 005    |
+23:26:45 | RB2:   | empty
+23:26:45 | WR1:   | empty
+23:26:45 | WR2:   | empty
+23:26:45 | TE:    | empty
+23:26:45 | FLEX:  | empty
+23:26:45 | DST:   | empty
+23:26:45 | K:     | empty
+23:26:45 | BENCH: | empty
+23:26:45 | BENCH: | empty
+23:26:45 | BENCH: | empty
+23:26:45 | BENCH: | empty
+23:26:45 | BENCH: | empty
+23:26:45 | BENCH: | empty
+23:26:45 | BENCH: | empty
+23:26:45 | Round:1 Pick:6 Total Pick: 6
+23:26:45 | comp6 selected DeAndre Hopkins
+23:26:45 | Round:1 Pick:7 Total Pick: 7
+23:26:45 | comp7 selected Davante Adams
+23:26:45 | Round:1 Pick:8 Total Pick: 8
+23:27:58 | Round:1 Pick:1 Total Pick: 1
+23:27:58 | comp1 selected Saquon Barkley
+23:27:58 | Round:1 Pick:2 Total Pick: 2
+23:27:58 | comp2 selected Ezekiel Elliott
+23:27:58 | Round:1 Pick:3 Total Pick: 3
+23:27:58 | comp3 selected Alvin Kamara
+23:27:58 | Round:1 Pick:4 Total Pick: 4
+23:27:58 | comp4 selected Christian McCaffrey
+23:27:58 | Round:1 Pick:5 Total Pick: 5
+23:27:58 | Your Turn!
+23:29:12 | Round:1 Pick:1 Total Pick: 1
+23:29:12 | comp1 selected Saquon Barkley
+23:29:12 | Round:1 Pick:2 Total Pick: 2
+23:29:12 | comp2 selected Ezekiel Elliott
+23:29:12 | Round:1 Pick:3 Total Pick: 3
+23:29:12 | comp3 selected Alvin Kamara
+23:29:12 | Round:1 Pick:4 Total Pick: 4
+23:29:12 | comp4 selected Christian McCaffrey
+23:29:12 | Round:1 Pick:5 Total Pick: 5
+23:29:12 | Your Turn!
+23:30:39 | Round:1 Pick:1 Total Pick: 1
+23:30:39 | comp1 selected Saquon Barkley
+23:30:39 | Round:1 Pick:2 Total Pick: 2
+23:30:39 | comp2 selected Ezekiel Elliott
+23:30:39 | Round:1 Pick:3 Total Pick: 3
+23:30:39 | comp3 selected Alvin Kamara
+23:30:39 | Round:1 Pick:4 Total Pick: 4
+23:30:39 | comp4 selected Christian McCaffrey
+23:30:39 | Round:1 Pick:5 Total Pick: 5
+23:30:39 | Your Turn!
+23:30:39 | Please Enter correct number for the player you would like to draft
+23:30:39 | Number | Name |
+23:30:39 | 1: | David Johnson
+23:30:39 | 2: | David Montgomery
+23:30:39 | 3: | David Njoku
+23:30:39 | 4: | David Moore
+23:30:39 | v selected David Johnson
+23:30:39 | fill_in
+23:30:39 | found rb at0
+23:30:39 | starting rb1 at0
+23:30:39 | print_roster
+23:30:39 | Team:v
+23:30:39 | Ros    | Name          | Pos | Rank | Team | Pick | Ovrall |
+23:30:39 | QB:    | empty
+23:30:39 | RB1:   | David Johnson | RB  | 005  | ARI  | 001  | 005    |
+23:30:39 | RB2:   | empty
+23:30:39 | WR1:   | empty
+23:30:39 | WR2:   | empty
+23:30:39 | TE:    | empty
+23:30:39 | FLEX:  | empty
+23:30:39 | DST:   | empty
+23:30:39 | K:     | empty
+23:30:39 | BENCH: | empty
+23:30:39 | BENCH: | empty
+23:30:39 | BENCH: | empty
+23:30:39 | BENCH: | empty
+23:30:39 | BENCH: | empty
+23:30:39 | BENCH: | empty
+23:30:39 | BENCH: | empty
+23:30:39 | Round:1 Pick:6 Total Pick: 6
+23:30:39 | comp6 selected DeAndre Hopkins
+23:30:39 | Round:1 Pick:7 Total Pick: 7
+23:30:39 | comp7 selected Davante Adams
+23:30:39 | Round:1 Pick:8 Total Pick: 8
+23:30:39 | comp8 selected James Conner
+23:30:39 | Round:2 Pick:1 Total Pick: 9
+23:32:43 | Round:1 Pick:1 Total Pick: 1
+23:32:43 | comp1 selected Saquon Barkley
+23:32:43 | Round:1 Pick:2 Total Pick: 2
+23:32:43 | comp2 selected Ezekiel Elliott
+23:32:43 | Round:1 Pick:3 Total Pick: 3
+23:32:43 | comp3 selected Alvin Kamara
+23:32:43 | Round:1 Pick:4 Total Pick: 4
+23:32:43 | comp4 selected Christian McCaffrey
+23:32:43 | Round:1 Pick:5 Total Pick: 5
+23:32:43 | Your Turn!
+23:32:43 | Please Enter correct number for the player you would like to draft
+23:32:43 | Number | Name |
+23:32:43 | 1: | David Johnson
+23:32:43 | 2: | Davante Adams
+23:32:43 | 3: | Dalvin Cook
+23:32:43 | 4: | David Montgomery
+23:32:43 | 5: | Corey Davis
+23:32:43 | 6: | David Njoku
+23:32:43 | 7: | David Moore
+23:32:43 | 8: | Mike Davis
+23:32:43 | 9: | Adam Vinatieri
+23:32:43 | 10: | Vernon Davis
+23:32:43 | 5 selected David Johnson
+23:32:43 | fill_in
+23:32:43 | found rb at0
+23:32:43 | starting rb1 at0
+23:32:43 | print_roster
+23:32:43 | Team:5
+23:32:43 | Ros    | Name          | Pos | Rank | Team | Pick | Ovrall |
+23:32:43 | QB:    | empty
+23:32:43 | RB1:   | David Johnson | RB  | 005  | ARI  | 001  | 005    |
+23:32:43 | RB2:   | empty
+23:32:43 | WR1:   | empty
+23:32:43 | WR2:   | empty
+23:32:43 | TE:    | empty
+23:32:43 | FLEX:  | empty
+23:32:43 | DST:   | empty
+23:32:43 | K:     | empty
+23:32:43 | BENCH: | empty
+23:32:43 | BENCH: | empty
+23:32:43 | BENCH: | empty
+23:32:43 | BENCH: | empty
+23:32:43 | BENCH: | empty
+23:32:43 | BENCH: | empty
+23:32:43 | BENCH: | empty
+23:32:43 | Round:1 Pick:6 Total Pick: 6
+23:32:43 | comp6 selected DeAndre Hopkins
+23:32:43 | Round:1 Pick:7 Total Pick: 7
+23:32:43 | comp7 selected Davante Adams
+23:32:43 | Round:1 Pick:8 Total Pick: 8
+23:32:43 | comp8 selected James Conner
+23:32:43 | Round:2 Pick:1 Total Pick: 9
+23:35:30 | Round:1 Pick:1 Total Pick: 1
+23:35:30 | comp1 selected Saquon Barkley
+23:35:30 | Round:1 Pick:2 Total Pick: 2
+23:35:30 | comp2 selected Ezekiel Elliott
+23:35:30 | Round:1 Pick:3 Total Pick: 3
+23:35:30 | comp3 selected Alvin Kamara
+23:35:30 | Round:1 Pick:4 Total Pick: 4
+23:35:30 | comp4 selected Christian McCaffrey
+23:35:30 | Round:1 Pick:5 Total Pick: 5
+23:35:30 | Your Turn!
+23:35:30 | Please Enter correct number for the player you would like to draft
+23:35:30 | Number | Name |
+23:35:30 | 1: | David Johnson
+23:35:30 | 2: | David Montgomery
+23:35:30 | 3: | David Njoku
+23:35:30 | 4: | David Moore
+23:35:30 | 5 selected David Johnson
+23:35:30 | fill_in
+23:35:30 | found rb at0
+23:35:30 | starting rb1 at0
+23:35:30 | print_roster
+23:35:30 | Team:5
+23:35:30 | Ros    | Name          | Pos | Rank | Team | Pick | Ovrall |
+23:35:30 | QB:    | empty
+23:35:30 | RB1:   | David Johnson | RB  | 005  | ARI  | 001  | 005    |
+23:35:30 | RB2:   | empty
+23:35:30 | WR1:   | empty
+23:35:30 | WR2:   | empty
+23:35:30 | TE:    | empty
+23:35:30 | FLEX:  | empty
+23:35:30 | DST:   | empty
+23:35:30 | K:     | empty
+23:35:30 | BENCH: | empty
+23:35:30 | BENCH: | empty
+23:35:30 | BENCH: | empty
+23:35:30 | BENCH: | empty
+23:35:30 | BENCH: | empty
+23:35:30 | BENCH: | empty
+23:35:30 | BENCH: | empty
+23:35:30 | Round:1 Pick:6 Total Pick: 6
+23:35:30 | comp6 selected DeAndre Hopkins
+23:35:30 | Round:1 Pick:7 Total Pick: 7
+23:35:30 | comp7 selected Davante Adams
+23:35:30 | Round:1 Pick:8 Total Pick: 8
+23:35:30 | comp8 selected James Conner
+23:35:30 | Round:2 Pick:1 Total Pick: 9
+23:35:30 | comp8 selected Travis Kelce
+23:35:30 | Round:2 Pick:2 Total Pick: 10
+23:35:30 | comp7 selected Julio Jones
+23:35:30 | Round:2 Pick:3 Total Pick: 11
+23:35:30 | comp6 selected Le'Veon Bell
+23:35:30 | Round:2 Pick:4 Total Pick: 12
+23:35:30 | Your Turn!
+23:35:30 | print_roster
+23:35:30 | Team:5
+23:35:30 | Ros    | Name          | Pos | Rank | Team | Pick | Ovrall |
+23:35:30 | QB:    | empty
+23:35:30 | RB1:   | David Johnson | RB  | 005  | ARI  | 001  | 005    |
+23:35:30 | RB2:   | empty
+23:35:30 | WR1:   | empty
+23:35:30 | WR2:   | empty
+23:35:30 | TE:    | empty
+23:35:30 | FLEX:  | empty
+23:35:30 | DST:   | empty
+23:35:30 | K:     | empty
+23:35:30 | BENCH: | empty
+23:35:30 | BENCH: | empty
+23:35:30 | BENCH: | empty
+23:35:30 | BENCH: | empty
+23:35:30 | BENCH: | empty
+23:35:30 | BENCH: | empty
+23:35:30 | BENCH: | empty
+23:35:30 | Sorry, could not find that pattern in any player's names.
+23:35:30 | Please Try again
