@@ -136,7 +136,7 @@ class Roster():
         while (len(name_str) < max_name_len):
             name_str += " "
         out_strin += name_str
-        out_strin += " | Pos | Rank | Team | Pick | Ovrall |" 
+        out_strin += " | Pos | Rank | Team | Pick | Ovrall | ADP |" 
         self.logger.logg(out_strin, 1)
 
         i = 0

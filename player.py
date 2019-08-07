@@ -21,15 +21,20 @@ class Player():
         #name_len 
         out_strin = ""
         out_strin += "%s"%(self.name)
-        while (len(out_strin) < name_len):
-            out_strin += " "
+        if name_len != None:
+            while (len(out_strin) < name_len):
+                out_strin += " "
         if prepend != None:
             out_strin = prepend + out_strin
         out_strin += " | %s | "%(self.position)
         out_strin += "%03d  | "%(self.rank)
         out_strin += "%s  | "%(self.team)
         out_strin += "%03d  | "%(self.pick)
-        out_strin += "%03d    |"%(self.overallpick)
+        out_strin += "%03d    | "%(self.overallpick)
+        try: 
+            out_strin += "%03d | "%(self.adp)
+        except:
+            out_strin += "err |"
         return out_strin
 
 if __name__ == '__main__':

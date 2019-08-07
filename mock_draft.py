@@ -20,19 +20,27 @@ def player_generate_fromcsv(line):
         position = lis[5]
         uppers = [l for l in position if l.isupper()]
         position = "".join(uppers)
-        if (len(position) < 3):
+        while (len(position) < 3):
             position += " "
     except:
         return
     name = lis[3]
     team = lis[4]
-    if (len(team) < 3):
+    while (len(team) < 3):
         team += " "
     try:
         bye = int(lis[6], 10)
     except:
         bye = None
-    adp = lis[11]
+    try:
+        adp = lis[11].split('.')[0]
+    except IndexError:
+        #unlucky see if it is not a float
+        pass
+    try:
+        adp = int(adp, 10)
+    except ValueError:
+        adp = "No data"
     player = Player(position, rank, name, team, bye, adp)
     return player
 
