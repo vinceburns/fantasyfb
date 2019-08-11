@@ -1,6 +1,10 @@
 # Log Files
 *.log
+# Log Files
+*.txt
 # Compiled python
 *.pyc
 # Compiled python
 tags
+# roster tracking
+rosters/**

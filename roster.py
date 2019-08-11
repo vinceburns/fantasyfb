@@ -21,6 +21,13 @@ class Roster():
         self.sorted_playerlist = []
         self.max_players = 16
         self.logger = logger
+        self.rosterfile = "rosters/%d_roster.ros"%(self.position)
+        try:
+            with open("FantasyPros_2019_Draft_Overall_Rankings.csv",'r') as f:
+                self.logger.logg("able to open file", 0)
+        except:
+            print "Can't open :%s exiting"%(self.rosterfile)
+            sys.exit(2)
         dummy = "Empty"
         for i in range(0, self.max_players):
             self.sorted_playerlist.append(dummy)
@@ -137,9 +144,16 @@ class Roster():
             name_str += " "
         out_strin += name_str
         out_strin += " | Pos | Rank | Team | Pick | Ovrall | ADP |" 
+        output = out_strin + '\n'
         self.logger.logg(out_strin, 1)
 
         i = 0
+        f = None
+        output = out_strin
+        try:
+            f = open(self.rosterfile,'w')
+        except:
+            self.logger.logg("unable to open file:%s"%(self.rosterfile), 1)
         for player in self.sorted_playerlist:
             if i < defs.PLAYERSTATUS_BENCH:
                 prepend = prepend_printlist[i]
@@ -147,10 +161,14 @@ class Roster():
                 prepend = prepend_printlist[defs.PLAYERSTATUS_BENCH]
             try:
                 out_strin = player.print_info(max_name_len, prepend)
-                self.logger.logg(out_strin, 1)
             except AttributeError:
-                self.logger.logg(prepend+"empty", 1)
+                out_strin = prepend+"empty"
+            self.logger.logg(out_strin, 1)
+            output += out_strin + "\n"
             i += 1
+        if f !=  None:
+            f.write(output)
+            f.close()
 
 if __name__ == '__main__':
     main()
