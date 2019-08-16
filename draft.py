@@ -282,7 +282,7 @@ class Draft():
             if check_roster != roster_idx[i]:
                 self.logger.logg("bad overall. got:%d expected:%d"%(overall[i], check_overall), 1)
                 return False
-            if !(check_overall % 8):
+            if (check_overall % 8):
                 #we at top or botom of snake
                 if inc < 0:
                     inc = 1
