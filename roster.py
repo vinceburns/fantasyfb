@@ -42,7 +42,7 @@ class Roster():
         for player in self.player_list:
             if player.position == defs.PLAYERTYPE_QB:
                 self.logger.logg("found qb at%d"%(i), 0)
-                if self.sorted_playerlist[defs.PLAYERSTATUS_QB] == None:
+                if self.sorted_playerlist[defs.PLAYERSTATUS_QB] == "Empty":
                     self.logger.logg("starting qb at%d"%(i), 0)
                     self.sorted_playerlist[defs.PLAYERSTATUS_QB] = player
                     player.status = defs.PLAYERSTATUS_QB

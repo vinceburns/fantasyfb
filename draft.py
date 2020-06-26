@@ -167,7 +167,7 @@ class Draft():
                         picks = f.readlines()
                         ret = self.resume_draft(f)
                     if ret:
-                        out_strin += "Updated draft logger to: %s"%(fil) 
+                        out_strin = "Updated draft logger to: %s"%(fil) 
                         self.logger.logg(out_strin, 1)
                         self.picklogger = fil
                         return True
@@ -263,7 +263,7 @@ class Draft():
             idx += 1
 
     def resume_draft(self, fil):
-        picks = f.readlines()
+        picks = fil.readlines()
         overall = []
         rank = []
         roster_idx = []
@@ -273,7 +273,6 @@ class Draft():
             roster_idx.append(int(pick.split("|")[1], 10))
         check_overall = 1
         check_roster = 0
-        inc = inc
         #integrity check
         for i in range(0, (len(overall)-1)):
             if overall[i] != check_overall:
