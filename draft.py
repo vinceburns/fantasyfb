@@ -9,7 +9,7 @@ from roster import Roster
 from player import Player
 
 class Draft():
-    def __init__(self, position, name, players, n_players, load=None):
+    def __init__(self, position, name, players, n_players, player_csv, load=None):
         self.roster = []
         self.players = players
         self.allplayers = copy.copy(players)
@@ -23,16 +23,17 @@ class Draft():
         self.rd_pick = 0
         self.total_pick = 1
         self.n_rosters = n_players
-        filname = 'Draft_' + time.strftime('%m_%d') + '.log'
+        filname = 'logs/draft/Draft_' + time.strftime('%m_%d_%y') + '.log'
         self.logger = draftlogging.Logger(filname)
-        filname = 'Draft_picks' + time.strftime('%m_%d_%H') + '.log'
+        filname = 'logs/picks/Draft_picks' + time.strftime('%m_%d_%y_%H') + '.log'
         self.picklogger = filname
+        self.player_csv = player_csv
         for i in range(1, (self.n_rosters+1)):
             if i == self.user_pos:
                 ros_str = name
             else:
                 ros_str = "comp%d"%(i)
-            roster = Roster(i, ros_str, self.logger)
+            roster = Roster(i, ros_str, self.player_csv, self.logger)
             self.roster.append(roster)
         if load != None:
             str =  "loading draft"
@@ -41,6 +42,7 @@ class Draft():
     def draft(self):
         while (1):
             #this will need some refactoring with the threading
+            print("round:%d pick:%d max_players:%d"%(self.round, self.rd_pick, self.roster[0].max_players))
             if (self.round > self.roster[0].max_players):
                 #print summary? do something?
                 self.logger.logg("draft complete", 1)
@@ -96,9 +98,9 @@ class Draft():
                 if self.players[i].position not in filterlist:
                     continue
             count += 1
-            printer = self.players[i].print_info(self.maxnamelen, "%02d | "%(count))
-            self.logger.logg(printer, 1)
-            return_list.append(i)
+            inter = self.players[i].print_info(self.maxnamelen, "%02d | "%(count))
+            lf.logger.logg(printer, 1)
+            turn_list.append(i)
         return return_list
 
     def player_select(self, idx):
@@ -116,14 +118,14 @@ class Draft():
         self.logger.logg("Your Turn!", 1)
         while (1):
             #todo keyboard thread... So we can set a max timer. 
-            uIn = raw_input("Please search for your selection or type 'h' for more options:\n")
+            uIn = input("Please search for your selection or type 'h' for more options:\n")
             if uIn == "h":
                 self.logger.logg("help menu\nInput | Function|", 1)
                 self.logger.logg("1  | Print Best available", 1)
                 self.logger.logg("2  | Print Current Roster", 1)
                 self.logger.logg("3  | Revert Pick", 1)
                 self.logger.logg("99 | Resume draft (server side only)", 1)
-                self.logger.logg("start fuzzy finding any name to search for a player you would like. See creator for what fuzzy finding means:) (he stole the idea from a vim plugin he uses", 1)
+                self.logger.logg("start fuzzy finding any name to search for a player you would like. See creator for what fuzzy finding means:) (he stole the idea from a vim plugin he uses)", 1)
                 continue
             elif uIn.startswith("1:"):
                 try:
@@ -220,7 +222,7 @@ class Draft():
         return return_list
 
     def draft_player(self, roster_idx, player_idx):
-        with open(self.picklogger, 'a') as f:
+        with open(self.picklogger, 'a+') as f:
             self.players[player_idx].rank
             #pick | roster_idx | player rank
             f.write("%d|%d|%d\n"%(self.total_pick, roster_idx, self.players[player_idx].rank))
@@ -312,19 +314,16 @@ class Draft():
     def confirm_selection(self, selections, roster_idx):
         if selections == None:
             return None
-        selection = raw_input("Would you like to select one of those players? if so please send y<selection> for example if you want #10 from that list please send 'y10'\n")
+        # selection = input("Would you like to select one of those players? if so please send y<selection> for example if you want #10 from that list please send 'y10'\n")
+        selection = "y:1"
         if not selection.startswith("y"):
             return None
-        try:
-            player_idx =  int(selection.split("y", 10)[1])
-        except:
-            print "error"
-            return None
+        player_idx =  int(selection.split(":", 10)[1])
         if ((player_idx <= len(selections)) and (player_idx > 0)):
             self.draft_player(roster_idx, selections[player_idx-1])
             return True
         else:
-            print player_idx, len(selections)
+            print(player_idx, len(selections))
             return None
 
 def is_fzfmatch(match_str, check_str):

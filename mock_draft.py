@@ -47,23 +47,24 @@ def player_generate_fromcsv(line):
 
 def main():
     players = []
-    with open("FantasyPros_2019_Draft_Overall_Rankings.csv",'r') as f:
-        f.next()
+    player_csv = "FantasyPros_2020_Draft_Overall_Rankings.csv"
+    with open(player_csv,'r') as f:
+        f.__next__()
         for line in f:
             player = player_generate_fromcsv(line)
             if player != None:
                 players.append(player)
     try:
-        position = int(raw_input("Welcome to Vince's Mock Draft. Please Enter your position:"), 10)
-        name = raw_input("Welcome to Vince's Mock Draft. Please Enter your team name:")
-        n_rosters = int(raw_input("Welcome to Vince's Mock Draft. Please Enter the number of players in the draft: "), 10)
+        position = int(input("Welcome to Vince's Mock Draft. Please Enter your position:"), 10)
+        name = input("Welcome to Vince's Mock Draft. Please Enter your team name:")
+        n_rosters = int(input("Welcome to Vince's Mock Draft. Please Enter the number of players in the draft: "), 10)
     except ValueError:
-        print "Invalid position. Exiting..."
+        print("Invalid position. Exiting...")
         sys.exit(2)
     if position > n_rosters or position < 0:
-        print "Invalid position. Exiting..."
+        print("Invalid position. Exiting...")
         sys.exit(2)
-    draft = Draft(position, name, players, n_rosters)
+    draft = Draft(position, name, players, n_rosters, player_csv)
     draft.draft()
 
 if __name__ == '__main__':

@@ -11,7 +11,7 @@ prepend_printlist = ["QB:    | ", "RB1:   | ", "RB2:   | ", "WR1:   | ",\
         "BENCH: | "]
 
 class Roster():
-    def __init__(self, position, name, logger):
+    def __init__(self, position, name, player_csv, logger):
         self.position = position
         self.name = name
         self.max_bench = 7
@@ -21,20 +21,18 @@ class Roster():
         self.sorted_playerlist = []
         self.max_players = 16
         self.logger = logger
+        self.b_idx = defs.PLAYERSTATUS_BENCH
         self.rosterfile = "rosters/%d_roster.ros"%(self.position)
-        try:
-            with open("FantasyPros_2019_Draft_Overall_Rankings.csv",'r') as f:
-                self.logger.logg("able to open file", 0)
-        except:
-            print "Can't open :%s exiting"%(self.rosterfile)
-            sys.exit(2)
+        self.player_csv = player_csv
+        with open(self.player_csv,'r') as f:
+            self.logger.logg("able to open file", 0)
         dummy = "Empty"
         for i in range(0, self.max_players):
             self.sorted_playerlist.append(dummy)
     def fill_in(self):
         #finish me
         self.logger.logg("fill_in", 0)
-        b_idx = defs.PLAYERSTATUS_BENCH
+        self.b_idx = defs.PLAYERSTATUS_BENCH
         dummy = "Empty"
         for i in range(0, self.max_players):
             self.sorted_playerlist[i] = dummy
@@ -48,9 +46,7 @@ class Roster():
                     player.status = defs.PLAYERSTATUS_QB
                 else:
                     self.logger.logg("bench qb at%d"%(i), 0)
-                    self.sorted_playerlist[b_idx] = player
-                    b_idx += 1
-                    player.status = defs.PLAYERSTATUS_BENCH
+                    self.bench_player_add(player)
             elif player.position == defs.PLAYERTYPE_RB:
                 self.logger.logg("found rb at%d"%(i), 0)
                 if self.sorted_playerlist[defs.PLAYERSTATUS_RB1] == "Empty":
@@ -67,9 +63,7 @@ class Roster():
                     self.logger.logg("starting flex at%d"%(i), 0)
                 else:
                     self.logger.logg("bench rb at%d"%(i), 0)
-                    self.sorted_playerlist[b_idx] = player
-                    b_idx += 1
-                    player.status = defs.PLAYERSTATUS_BENCH
+                    self.bench_player_add(player)
             elif player.position == defs.PLAYERTYPE_WR:
                 self.logger.logg("found wr at%d"%(i), 0)
                 if self.sorted_playerlist[defs.PLAYERSTATUS_WR1] == "Empty":
@@ -86,9 +80,7 @@ class Roster():
                     self.logger.logg("starting flex at%d"%(i), 0)
                 else:
                     self.logger.logg("bench wr at%d"%(i), 0)
-                    self.sorted_playerlist[b_idx] = player
-                    b_idx += 1
-                    player.status = defs.PLAYERSTATUS_BENCH
+                    self.bench_player_add(player)
             elif player.position == defs.PLAYERTYPE_TE:
                 self.logger.logg("found te at%d"%(i), 0)
                 if self.sorted_playerlist[defs.PLAYERSTATUS_TE] == "Empty":
@@ -101,9 +93,7 @@ class Roster():
                     self.logger.logg("starting flex at%d"%(i), 0)
                 else:
                     self.logger.logg("bench te at%d"%(i), 0)
-                    self.sorted_playerlist[b_idx] = player
-                    b_idx += 1
-                    player.status = defs.PLAYERSTATUS_BENCH
+                    self.bench_player_add(player)
             elif player.position == defs.PLAYERTYPE_DST:
                 self.logger.logg("found dst at%d"%(i), 0)
                 if self.sorted_playerlist[defs.PLAYERSTATUS_DST] == "Empty":
@@ -112,9 +102,7 @@ class Roster():
                     player.status = defs.PLAYERSTATUS_DST
                 else:
                     self.logger.logg("bench dst at%d"%(i), 0)
-                    self.sorted_playerlist[b_idx] = player
-                    b_idx += 1
-                    player.status = defs.PLAYERSTATUS_BENCH
+                    self.bench_player_add(player)
             elif player.position == defs.PLAYERTYPE_KICKER:
                 self.logger.logg("kicker found at%d"%(i), 0)
                 if self.sorted_playerlist[defs.PLAYERSTATUS_KICKER] == "Empty":
@@ -123,13 +111,22 @@ class Roster():
                     player.status = defs.PLAYERSTATUS_KICKER
                 else:
                     self.logger.logg("bench kicker at%d"%(i), 0)
-                    self.sorted_playerlist[b_idx] = player
-                    b_idx += 1
-                    player.status = defs.PLAYERSTATUS_BENCH
+                    self.bench_player_add()
             else:
                 self.logger.logg("unknown found at%d"%(i), 1)
             i += 1
         self.print_roster()
+
+    def bench_player_add(self, player):
+        try:
+            self.sorted_playerlist[self.b_idx] = player
+        except IndexError:
+            # they ran out of bench room. just extend it for them.
+            self.sorted_playerlist.append(player)
+
+        player.status = defs.PLAYERSTATUS_BENCH
+        self.b_idx += 1
+
 
     def print_roster(self):
         self.logger.logg("print_roster", 0)
@@ -150,25 +147,21 @@ class Roster():
         i = 0
         f = None
         output = out_strin
-        try:
-            f = open(self.rosterfile,'w')
-        except:
-            self.logger.logg("unable to open file:%s"%(self.rosterfile), 1)
-        for player in self.sorted_playerlist:
-            if i < defs.PLAYERSTATUS_BENCH:
-                prepend = prepend_printlist[i]
-            else:
-                prepend = prepend_printlist[defs.PLAYERSTATUS_BENCH]
-            try:
-                out_strin = player.print_info(max_name_len, prepend)
-            except AttributeError:
-                out_strin = prepend+"empty"
-            self.logger.logg(out_strin, 1)
-            output += out_strin + "\n"
-            i += 1
-        if f !=  None:
+        with open(self.rosterfile,'w') as f:
+            for player in self.sorted_playerlist:
+                if i < defs.PLAYERSTATUS_BENCH:
+                    prepend = prepend_printlist[i]
+                else:
+                    prepend = prepend_printlist[defs.PLAYERSTATUS_BENCH]
+                try:
+                    out_strin = player.print_info(max_name_len, prepend)
+                except AttributeError:
+                    out_strin = prepend+"empty"
+                self.logger.logg(out_strin, 1)
+                output += out_strin + "\n"
+                i += 1
             f.write(output)
-            f.close()
+            
 
 if __name__ == '__main__':
     main()
