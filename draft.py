@@ -98,9 +98,9 @@ class Draft():
                 if self.players[i].position not in filterlist:
                     continue
             count += 1
-            inter = self.players[i].print_info(self.maxnamelen, "%02d | "%(count))
-            lf.logger.logg(printer, 1)
-            turn_list.append(i)
+            printer = self.players[i].print_info(self.maxnamelen, "%02d | "%(count))
+            self.logger.logg(printer, 1)
+            return_list.append(i)
         return return_list
 
     def player_select(self, idx):
@@ -127,16 +127,12 @@ class Draft():
                 self.logger.logg("99 | Resume draft (server side only)", 1)
                 self.logger.logg("start fuzzy finding any name to search for a player you would like. See creator for what fuzzy finding means:) (he stole the idea from a vim plugin he uses)", 1)
                 continue
-            elif uIn.startswith("1:"):
+            elif uIn.startswith("1"):
                 try:
                     position = uIn.split(':')[1]
                 except:
                     position = None
                 selections = self.show_topavail(position)
-                if self.confirm_selection(selections, idx) == True:
-                    return 
-            elif uIn.startswith("1"):
-                selections = self.show_topavail(None)
                 if self.confirm_selection(selections, idx) == True:
                     return 
             elif uIn.startswith("2"):
@@ -314,8 +310,7 @@ class Draft():
     def confirm_selection(self, selections, roster_idx):
         if selections == None:
             return None
-        # selection = input("Would you like to select one of those players? if so please send y<selection> for example if you want #10 from that list please send 'y10'\n")
-        selection = "y:1"
+        selection = input("Would you like to select one of those players? if so please send y<selection> for example if you want #10 from that list please send 'y10'\n")
         if not selection.startswith("y"):
             return None
         player_idx =  int(selection.split(":", 10)[1])
