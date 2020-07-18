@@ -31,6 +31,7 @@ class Roster():
             self.sorted_playerlist.append(dummy)
     def fill_in(self):
         #finish me
+        print("HELLO")
         self.logger.logg("fill_in", 0)
         self.b_idx = defs.PLAYERSTATUS_BENCH
         dummy = "Empty"

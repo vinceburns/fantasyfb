@@ -1,7 +1,9 @@
 import time
+import threading
 
 class Logger():
     def __init__(self, filename):
+        self.mutex = threading.Lock()
         self.wrfile = filename
         self.header = time.strftime("%H:%M:%S | ",time.localtime())
         with open(self.wrfile, 'w+') as f:

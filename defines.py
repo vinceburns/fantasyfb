@@ -18,5 +18,9 @@ class Defines():
     PLAYERSTATUS_KICKER = 8
     PLAYERSTATUS_BENCH  = 9
 
+    EVENTTYPE_SYNC                   = 0
+    EVENTTYPE_YOURTURN               = 1
+    EVENTTYPE_DRAFTPLAYER            = 2
+
 if __name__ == '__main__':
     main()

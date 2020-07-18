@@ -55,9 +55,12 @@ def main():
             if player != None:
                 players.append(player)
     try:
-        position = int(input("Welcome to Vince's Mock Draft. Please Enter your position:"), 10)
-        name = input("Welcome to Vince's Mock Draft. Please Enter your team name:")
-        n_rosters = int(input("Welcome to Vince's Mock Draft. Please Enter the number of players in the draft: "), 10)
+        # position = int(input("Welcome to Vince's Mock Draft. Please Enter your position:"), 10)
+        # name = input("Welcome to Vince's Mock Draft. Please Enter your team name:")
+        # n_rosters = int(input("Welcome to Vince's Mock Draft. Please Enter the number of players in the draft: "), 10)
+        position = 6
+        name = "vinny"
+        n_rosters = 8
     except ValueError:
         print("Invalid position. Exiting...")
         sys.exit(2)
