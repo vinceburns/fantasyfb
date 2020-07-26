@@ -237,7 +237,9 @@ def main():
             elif line.startswith("TEAM_NAME"):
                 name = line.split("=", 1)[1].strip()
             elif line.startswith("SERVER_ADDRESS"):
-                send_address = line.split("=", 1)[1].strip()
+                ip = line.split("=", 1)[1].split(",", 1)[0].strip()
+                send_port = int(line.split("=", 1)[1].split(",", 1)[1], 10)
+                send_address = (ip, send_port)
 
     with open(player_csv,'r') as f:
         f.__next__()
