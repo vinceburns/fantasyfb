@@ -32,7 +32,7 @@ class SendingThread(threading.Thread):
         while True:
             while not self.queue.empty():
                 data, addr = self.queue.get()
-                self.sock.sendto(data.encode, addr)
+                self.sock.sendto(data.encode(), addr)
                 self.queue.task_done()
             time.sleep(1)
 
@@ -57,7 +57,8 @@ class ReceiverThread(threading.Thread):
         while True:
             try:
                 data, addr = self.sock.recvfrom(4096)
-                out_string = (strftime("[%H:%M:%S] ",localtime()) + data + " from " + str(addr[0]) + ":" + str(addr[1]))
+                data = str(data)
+                out_string = (strftime("[%H:%M:%S] ",localtime()) + str(data) + " from " + str(addr[0]) + ":" + str(addr[1]))
                 self.draft.logger.logg(out_string, 1)
                 splitter = data.split(",")
                 #@todo (vburns) move all of these strings to defines that client and server can share
@@ -68,10 +69,10 @@ class ReceiverThread(threading.Thread):
             except socket.timeout:
                 out_string = "timeout exception"
                 self.draft.logger.logg(out_string, 1)
-            except Exception as ex:
-                template = "An exception of type {0} occurred. Arguments:\n{1!r}"
-                message = template.format(type(ex).__name__, ex.args)
-                print(message)
+            # except Exception as ex:
+                # template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+                # message = template.format(type(ex).__name__, ex.args)
+                # print(message)
     def handle_msg(self, splitter, addr):
         if splitter[0] == "draft_player":
             r_name = splitter[1]

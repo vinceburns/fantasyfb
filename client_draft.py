@@ -60,6 +60,7 @@ class ReceiverThread(threading.Thread):
             try:
 
                 data, addr = self.sock.recvfrom(4096)
+                data = str(data)
                 out_string = (strftime("[%H:%M:%S] ",localtime()) + str(data) + " from " + str(addr[0]) + ":" + str(addr[1]))
                 self.draft.acquire()
                 self.draft.logger.logg(out_string, 1)
