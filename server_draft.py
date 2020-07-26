@@ -255,6 +255,7 @@ def main():
                 name = line.split("=", 1)[1].strip()
             elif line.startswith("SERVER_ADDRESS"):
                 send_address = line.split("=", 1)[1].strip()
+
     with open(player_csv,'r') as f:
         f.__next__()
         for line in f:

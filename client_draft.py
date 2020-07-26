@@ -227,7 +227,7 @@ def main():
     with open("user_cfg.cfg",'r') as f:
         for line in f:
             if line.startswith("CSVFILE"):
-                player_csv = line.split("=", 1)[1]
+                player_csv = line.split("=", 1)[1].strip()
             elif line.startswith("PORT"):
                 port = int(line.split("=", 1)[1], 10)
             elif line.startswith("DRAFTPOSITION"):
@@ -235,11 +235,9 @@ def main():
             elif line.startswith("N_TEAMS"):
                 n_rosters = int(line.split("=", 1)[1], 10)
             elif line.startswith("TEAM_NAME"):
-                name = line.split("=", 1)[1]
+                name = line.split("=", 1)[1].strip()
             elif line.startswith("SERVER_ADDRESS"):
-                send_address = line.split("=", 1)[1]
-            else:
-                print("Unsupported config!:{0}".format(line))
+                send_address = line.split("=", 1)[1].strip()
 
     with open(player_csv,'r') as f:
         f.__next__()
