@@ -29,6 +29,7 @@ class Roster():
         dummy = "Empty"
         for i in range(0, self.max_players):
             self.sorted_playerlist.append(dummy)
+        self.address = None
     def fill_in(self):
         #finish me
         print("HELLO")
@@ -146,8 +147,6 @@ class Roster():
         self.logger.logg(out_strin, 1)
 
         i = 0
-        f = None
-        output = out_strin
         with open(self.rosterfile,'w') as f:
             for player in self.sorted_playerlist:
                 if i < defs.PLAYERSTATUS_BENCH:

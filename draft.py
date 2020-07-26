@@ -25,6 +25,7 @@ class Draft():
         self.rd_pick = 0
         self.total_pick = 1
         self.n_rosters = n_players
+        self.selections = []
         filname = 'logs/draft/Draft_' + time.strftime('%m_%d_%y') + '.log'
         self.logger = draftlogging.Logger(filname)
         filname = 'logs/picks/Draft_picks' + time.strftime('%m_%d_%y_%H') + '.log'
@@ -43,6 +44,7 @@ class Draft():
         if load != None:
             str =  "loading draft"
             self.logger.logg(str, 1)
+        self.current_roster = self.roster[0]
 
     def acquire(self):
         self.mutex.acquire()
@@ -51,11 +53,7 @@ class Draft():
         self.mutex.release()
 
     def my_turn(self):
-        roster_idx = self.rd_pick
-        if self.round % 2 != 0:
-            #going down the snake. or should i say snek
-            roster_idx = ((self.n_rosters-1) - self.rd_pick)
-        if (self.user_pos == roster_idx):
+        if self.current_roster == self.user_roster:
             return True
         return False
 
@@ -109,24 +107,27 @@ class Draft():
         return return_list
 
     def draft_player(self, player_idx):
-        roster_idx = self.rd_pick
-        if self.round % 2 != 0:
-            #going down the snake. or should i say snek
-            roster_idx = ((self.n_rosters-1) - self.rd_pick)
         with open(self.picklogger, 'a+') as f:
             #pick | roster_idx | player rank
             f.write("%d|%d|%d\n"%(self.total_pick, roster_idx, self.players[player_idx].rank))
-        self.logger.logg("%s selected %s"%(self.roster[roster_idx].name, self.players[player_idx].name), 1)
+        self.logger.logg("%s selected %s"%(self.current_roster.name, self.players[player_idx].name), 1)
         self.players[player_idx].pick = self.rd_pick + 1
         self.players[player_idx].overallpick = self.total_pick
-        self.roster[roster_idx].player_list.append(self.players[player_idx])
+        self.selections.append(self.players[player_idx].rank)
+        self.current_roster.player_list.append(self.players[player_idx])
         del self.players[player_idx]
         self.total_pick += 1
         self.rd_pick += 1
         if (self.rd_pick == self.n_rosters):
             self.rd_pick = 0
             self.round += 1
-        self.roster[roster_idx].fill_in()
+        self.current_roster.fill_in()
+
+        roster_idx = self.rd_pick
+        if self.round % 2 != 0:
+            #going down the snake. or should i say snek
+            roster_idx = ((self.n_rosters-1) - self.rd_pick)
+        self.current_roster = self.roster[roster_idx]
         # time.sleep(1)
 
     def confirm_selection(self, selections, uIn):
@@ -140,35 +141,47 @@ class Draft():
         if ((player_idx <= len(selections)) and (player_idx > 0)):
             return self.draft.players[player_idx-1].name, selections[player_idx-1]
         else:
-            print(player_idx, len(selections))
+            self.logger.logg("confirm_select fail. player_idx:{0}, len:{1}".format(player_idx, len(selections)), 1)
             return None
 
     def sync_draft(self, selections):
-        with open(self.picklogger, 'w') as f:
-            pass
         self.players = copy.copy(self.allplayers)
-        for roster in self.roster:
-            roster.n_rosters = 0
         self.round = 0
         self.rd_pick = 0
         self.total_pick = 0
+        self.selections = []
         while (self.total_pick < len(selections)):
-            print("total_pick:{0} len:{1}".format(self.total_pick, len(selections)))
-            print("round:{0} roster:{1} self.rd_pick:{2}".format(self.round, self.roster[roster_idx].name, self.rd_pick))
+            self.logger.logg("round:{0} roster:{1} self.rd_pick:{2}".format(self.round, self.current_roster.name, self.rd_pick), 1)
             player_idx = len(self.players)
             for i in range(0, len(self.players)):
                 if self.players[i].rank == selections[self.total_pick]:
                     player_idx = i
                     break;
             if (player_idx == len(self.players)):
-                print("invalid player selection")
+                self.logger.logg("invalid player selection", 1)
                 sys.exit(2)
 
-            self.draft_player(roster_idx, player_idx)
-            print("hi")
+            self.draft_player(player_idx)
 
-        print("total_pick:{0} len:{1}".format(self.total_pick, len(selections)))
+        self.logger.logg("total_pick:{0} len:{1}".format(self.total_pick, len(selections)), 1)
         return True
+
+    def resume_draft(self, file_name):
+        selections = []
+        try:
+            with open(file_name, 'r') as f:
+                for line in f:
+                    #pick | roster_idx | player rank
+                    try:
+                        selections.append(int(line.split("|")[2], 10))
+                    except:
+                        self.logger.logg("cant split! {0}".foramt(line), 1)
+                        return
+            self.sync_draft(selections)
+
+        except:
+            self.logger.logg("Invalid Log file!",1)
+
 
 if __name__ == '__main__':
     main()
