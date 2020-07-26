@@ -66,7 +66,7 @@ class ReceiverThread(threading.Thread):
                 else:
                     self.handle_msg(splitter, addr)
             except socket.timeout:
-                out_string = "timeout exception".format(port)
+                out_string = "timeout exception"
                 self.draft.logger.logg(out_string, 1)
             except Exception as ex:
                 template = "An exception of type {0} occurred. Arguments:\n{1!r}"

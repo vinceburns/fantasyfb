@@ -82,7 +82,7 @@ class ReceiverThread(threading.Thread):
                         self.connected = 1
                 self.draft.release()
             except socket.timeout:
-                out_string = "timeout exception".format(port)
+                out_string = "timeout exception"
                 self.draft.logger.logg(out_string, 1)
             except Exception as ex:
                 template = "An exception of type {0} occurred. Arguments:\n{1!r}"
