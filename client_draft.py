@@ -10,7 +10,7 @@ from roster import Roster
 from player import Player
 import time
 
-send_address = ("localhost", 7096)
+send_address = ("192.168.0.106", 7096)
 confirm_selection_str = "It's your turn. Would you like to select one of those players? if so please send y<selection> for example if you want #10 from that list please send 'y10'\n"
 
 '''
