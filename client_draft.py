@@ -219,9 +219,28 @@ def player_generate_fromcsv(line):
 
 
 def main():
-    port = int(input("Enter the Port: "), 10)
     players = []
     player_csv = "FantasyPros_2020_Draft_Overall_Rankings.csv"
+    position = 6
+    name = "vinny"
+    n_rosters = 8
+    with open("user_cfg.cfg",'r') as f:
+        for line in f:
+            if line.startswith("CSVFILE"):
+                player_csv = line.split("=", 1)[1]
+            elif line.startswith("PORT"):
+                port = int(line.split("=", 1)[1], 10)
+            elif line.startswith("DRAFTPOSITION"):
+                position = int(line.split("=", 1)[1], 10)
+            elif line.startswith("N_TEAMS"):
+                n_rosters = int(line.split("=", 1)[1], 10)
+            elif line.startswith("TEAM_NAME"):
+                name = line.split("=", 1)[1]
+            elif line.startswith("SERVER_ADDRESS"):
+                send_address = line.split("=", 1)[1]
+            else:
+                print("Unsupported config!:{0}".format(line))
+
     with open(player_csv,'r') as f:
         f.__next__()
         for line in f:
@@ -229,14 +248,7 @@ def main():
             if player != None:
                 players.append(player)
 
-    # position = int(input("Welcome to Vince's Mock Draft. Please Enter your position:"), 10)
-    # name = input("Welcome to Vince's Mock Draft. Please Enter your team name:")
-    # n_rosters = int(input("Welcome to Vince's Mock Draft. Please Enter the number of players in the draft: "), 10)
-    position = 6
-    name = "vinny"
-    n_rosters = 8
     draft = Draft(position, name, players, n_rosters, player_csv)
-
     txqueue = Queue()
     keyboard_rxqueue = Queue()
 
