@@ -8,7 +8,6 @@ from multiprocessing import *
 from draft import Draft
 from roster import Roster
 from player import Player
-import msvcrt
 import time
 
 send_address = ("localhost", 7096)

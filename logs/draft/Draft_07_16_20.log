@@ -1,0 +1,149 @@
+14:20:28 | Draft Starting
+14:20:28 | able to open file
+14:20:28 | able to open file
+14:20:28 | able to open file
+14:20:28 | able to open file
+14:20:28 | able to open file
+14:20:28 | able to open file
+14:20:28 | able to open file
+14:20:28 | able to open file
+14:20:28 | Round:1 Pick:1 Total Pick: 1
+14:20:28 | Your Turn!
+14:20:28 | comp1 selected Saquon Barkley
+14:20:28 | fill_in
+14:20:28 | found rb at0
+14:20:28 | starting rb1 at0
+14:20:28 | print_roster
+14:20:28 | Team:comp1
+14:20:28 | Ros    | Name           | Pos | Rank | Team | Pick | Ovrall | ADP |
+14:20:28 | QB:    | empty
+14:20:28 | RB1:   | Saquon Barkley | RB  | 002  | NYG  | 001  | 000    | 002 | 
+14:20:28 | RB2:   | empty
+14:20:28 | WR1:   | empty
+14:20:28 | WR2:   | empty
+14:20:28 | TE:    | empty
+14:20:28 | FLEX:  | empty
+14:20:28 | DST:   | empty
+14:20:28 | K:     | empty
+14:20:28 | BENCH: | empty
+14:20:28 | BENCH: | empty
+14:20:28 | BENCH: | empty
+14:20:28 | BENCH: | empty
+14:20:28 | BENCH: | empty
+14:20:28 | BENCH: | empty
+14:20:28 | BENCH: | empty
+14:20:28 | comp2 selected Michael Thomas
+14:20:28 | fill_in
+14:20:28 | found wr at0
+14:20:28 | starting wr1 at0
+14:20:28 | print_roster
+14:20:28 | Team:comp2
+14:20:28 | Ros    | Name           | Pos | Rank | Team | Pick | Ovrall | ADP |
+14:20:28 | QB:    | empty
+14:20:28 | RB1:   | empty
+14:20:28 | RB2:   | empty
+14:20:28 | WR1:   | Michael Thomas | WR  | 003  | NO   | 002  | 001    | 007 | 
+14:20:28 | WR2:   | empty
+14:20:28 | TE:    | empty
+14:20:28 | FLEX:  | empty
+14:20:28 | DST:   | empty
+14:20:28 | K:     | empty
+14:20:28 | BENCH: | empty
+14:20:28 | BENCH: | empty
+14:20:28 | BENCH: | empty
+14:20:28 | BENCH: | empty
+14:20:28 | BENCH: | empty
+14:20:28 | BENCH: | empty
+14:20:28 | BENCH: | empty
+14:20:28 | comp3 selected Derrick Henry
+14:20:28 | fill_in
+14:20:28 | found rb at0
+14:20:28 | starting rb1 at0
+14:20:28 | print_roster
+14:20:28 | Team:comp3
+14:20:28 | Ros    | Name          | Pos | Rank | Team | Pick | Ovrall | ADP |
+14:20:28 | QB:    | empty
+14:20:28 | RB1:   | Derrick Henry | RB  | 005  | TEN  | 003  | 002    | 006 | 
+14:20:28 | RB2:   | empty
+14:20:28 | WR1:   | empty
+14:20:28 | WR2:   | empty
+14:20:28 | TE:    | empty
+14:20:28 | FLEX:  | empty
+14:20:28 | DST:   | empty
+14:20:28 | K:     | empty
+14:20:28 | BENCH: | empty
+14:20:28 | BENCH: | empty
+14:20:28 | BENCH: | empty
+14:20:28 | BENCH: | empty
+14:20:28 | BENCH: | empty
+14:20:28 | BENCH: | empty
+14:20:28 | BENCH: | empty
+14:20:28 | comp4 selected Christian McCaffrey
+14:20:28 | fill_in
+14:20:28 | found rb at0
+14:20:28 | starting rb1 at0
+14:20:28 | print_roster
+14:20:28 | Team:comp4
+14:20:28 | Ros    | Name                | Pos | Rank | Team | Pick | Ovrall | ADP |
+14:20:28 | QB:    | empty
+14:20:28 | RB1:   | Christian McCaffrey | RB  | 001  | CAR  | 004  | 003    | 001 | 
+14:20:28 | RB2:   | empty
+14:20:28 | WR1:   | empty
+14:20:28 | WR2:   | empty
+14:20:28 | TE:    | empty
+14:20:28 | FLEX:  | empty
+14:20:28 | DST:   | empty
+14:20:28 | K:     | empty
+14:20:28 | BENCH: | empty
+14:20:28 | BENCH: | empty
+14:20:28 | BENCH: | empty
+14:20:28 | BENCH: | empty
+14:20:28 | BENCH: | empty
+14:20:28 | BENCH: | empty
+14:20:28 | BENCH: | empty
+14:20:28 | comp5 selected Alvin Kamara
+14:20:28 | fill_in
+14:20:28 | found rb at0
+14:20:28 | starting rb1 at0
+14:20:28 | print_roster
+14:20:28 | Team:comp5
+14:20:28 | Ros    | Name         | Pos | Rank | Team | Pick | Ovrall | ADP |
+14:20:28 | QB:    | empty
+14:20:28 | RB1:   | Alvin Kamara | RB  | 006  | NO   | 005  | 004    | 005 | 
+14:20:28 | RB2:   | empty
+14:20:28 | WR1:   | empty
+14:20:28 | WR2:   | empty
+14:20:28 | TE:    | empty
+14:20:28 | FLEX:  | empty
+14:20:28 | DST:   | empty
+14:20:28 | K:     | empty
+14:20:28 | BENCH: | empty
+14:20:28 | BENCH: | empty
+14:20:28 | BENCH: | empty
+14:20:28 | BENCH: | empty
+14:20:28 | BENCH: | empty
+14:20:28 | BENCH: | empty
+14:20:28 | BENCH: | empty
+14:20:28 | vinny selected Ronald Jones II
+14:20:28 | fill_in
+14:20:28 | found rb at0
+14:20:28 | starting rb1 at0
+14:20:28 | print_roster
+14:20:28 | Team:vinny
+14:20:28 | Ros    | Name            | Pos | Rank | Team | Pick | Ovrall | ADP |
+14:20:28 | QB:    | empty
+14:20:28 | RB1:   | Ronald Jones II | RB  | 100  | TB   | 006  | 005    | 096 | 
+14:20:28 | RB2:   | empty
+14:20:28 | WR1:   | empty
+14:20:28 | WR2:   | empty
+14:20:28 | TE:    | empty
+14:20:28 | FLEX:  | empty
+14:20:28 | DST:   | empty
+14:20:28 | K:     | empty
+14:20:28 | BENCH: | empty
+14:20:28 | BENCH: | empty
+14:20:28 | BENCH: | empty
+14:20:28 | BENCH: | empty
+14:20:28 | BENCH: | empty
+14:20:28 | BENCH: | empty
+14:20:28 | BENCH: | empty
