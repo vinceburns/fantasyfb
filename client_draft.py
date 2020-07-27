@@ -55,7 +55,7 @@ class ReceiverThread(threading.Thread):
         while True:
             if self.connected == 0:
                 init_string = "init,name={0},pos={1}".format(self.draft.user_pos, self.draft.user_name)
-                self.txqueue.put(init_string)
+                self.txqueue.put_nowait(init_string)
                 self.draft.logger.logg("init put!", 1)
             try:
 
@@ -70,12 +70,12 @@ class ReceiverThread(threading.Thread):
                     for i in range(1, len(splitter)):
                         selections = int(splitter[i])
                     self.draft.sync_draft(selections)
-                    self.keyqueue.put("sync")
+                    self.keyqueue.put_nowait("sync")
                 if splitter[0] == "error":
-                    self.keyqueue.put(data)
+                    self.keyqueue.put_nowait(data)
                     self.send_server("ack")
                 if splitter[0] == "draftack":
-                    self.keyqueue.put(data)
+                    self.keyqueue.put_nowait(data)
                     self.send_server("ack")
                 if splitter[0] == "init":
                     if splitter[1] == "success":
@@ -90,7 +90,7 @@ class ReceiverThread(threading.Thread):
                 print(message)
 
     def send_server(self, msg):
-        self.txqueue.put("{0},{1},{2}".format(self.draft.user_roster.name, self.draft.user_roster.pos, msg))
+        self.txqueue.put_nowait("{0},{1},{2}".format(self.draft.user_roster.name, self.draft.user_roster.pos, msg))
 
 class KeyboardThread(threading.Thread):
     def __init__(self, draft, txqueue, rxqueue):
@@ -178,7 +178,7 @@ class KeyboardThread(threading.Thread):
         return 
 
     def send_server(self, msg):
-        self.txqueue.put("{0},{1},{2}".format(self.draft.user_roster.name, self.draft.user_roster.pos, msg))
+        self.txqueue.put_nowait("{0},{1},{2}".format(self.draft.user_roster.name, self.draft.user_roster.pos, msg))
 
 
 def player_generate_fromcsv(line):

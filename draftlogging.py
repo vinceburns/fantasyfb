@@ -1,5 +1,6 @@
 import time
 import threading
+import sys
 
 class Logger():
     def __init__(self, filename):
@@ -11,6 +12,7 @@ class Logger():
     def logg(self, outstr, toconsole):
         if toconsole == 1:
             print(outstr)
+            sys.stdout.flush()
         with open(self.wrfile, 'a+') as f:
             f.write(self.header+outstr+'\n')
 

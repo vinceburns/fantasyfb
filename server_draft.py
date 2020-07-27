@@ -27,14 +27,17 @@ class SendingThread(threading.Thread):
         self.queue = queue
         self.draft = draft
         self.send_addr = send_addr
+        self.ts = None
 
     def run(self):
         while True:
+            self.ts = time.time()
             while not self.queue.empty():
                 data, addr = self.queue.get()
                 self.sock.sendto(data.encode(), addr)
                 self.queue.task_done()
-            time.sleep(1)
+            # print("Send process time:{0}".format(time.time()-self.ts))
+            time.sleep(.5)
 
 
 class ReceiverThread(threading.Thread):
@@ -52,10 +55,12 @@ class ReceiverThread(threading.Thread):
         out_string = "Socket open on {}! Listening...".format(port)
         self.draft.logger.logg(out_string, 1)
         self.connected = 0
+        self.ts = None
 
     def run(self):
         while True:
             try:
+                self.ts = time.time()
                 data, addr = self.sock.recvfrom(4096)
                 data = str(data)
                 out_string = (strftime("[%H:%M:%S] ",localtime()) + str(data) + " from " + str(addr[0]) + ":" + str(addr[1]))
@@ -72,6 +77,7 @@ class ReceiverThread(threading.Thread):
                 # template = "An exception of type {0} occurred. Arguments:\n{1!r}"
                 # message = template.format(type(ex).__name__, ex.args)
                 # print(message)
+            # print("Recv process time:{0}".format(time.time()-self.ts))
     def handle_msg(self, splitter, addr):
         if splitter[0] == "draft_player":
             r_name = splitter[1]
@@ -86,12 +92,12 @@ class ReceiverThread(threading.Thread):
                     if player.name == p_name and player.rank == p_rank:
                         self.draft.draft_player(player_idx)
                 if player_idx == len(self.draft.players):
-                    self.txqueue.put("error",addr)
+                    self.txqueue.put_nowait("error",addr)
                 else:
-                    self.txqueue.put("draftack",addr)
+                    self.txqueue.put_nowait("draftack",addr)
                     self.sync_up(self.draft, self.txqueue)
             else:
-                self.txqueue.put("error",addr)
+                self.txqueue.put_nowait("error",addr)
 
     def init_roster(self, splitter, addr):
         found = 0
@@ -103,14 +109,14 @@ class ReceiverThread(threading.Thread):
                 found = 1
                 break
         if found == 1:
-            self.txqueue.put("init,success", addr)
+            self.txqueue.put_nowait("init,success", addr)
             if len(self.draft.selections):
                 sync_str = "sync"
                 for i in range(0, len(self.draft.selections)):
                     sync_str += ",{0}".format(self.draft.selections[i])
-                self.txqueue.put(sync_str, addr)
+                self.txqueue.put_nowait(sync_str, addr)
         else:
-            self.txqueue.put("init,failure", addr)
+            self.txqueue.put_nowait("init,failure", addr)
 
 class KeyboardThread(threading.Thread):
     def __init__(self, draft, txqueue, rxqueue):
@@ -123,18 +129,21 @@ class KeyboardThread(threading.Thread):
         self.synced = 0
         self.selected = 0
         self.pick_outcome = 0
+        self.ts = time.time()
         self.selections = []
 
     def run(self):
         while True:
             try:
                 uIn = input()
+                # print("In between execute:{0}".format(time.time()-self.ts))
+                self.ts = time.time()
                 if uIn:
                     self.parse_input(uIn)
             except EOFError:
                 _exit(1)
-            except TimeoutExpired:
-                pass
+            # print("Keyboard process time:{0}".format(time.time()-self.ts))
+            self.ts = time.time()
     def parse_input(self, uIn):
         draft = self.draft
         print("self.state:{0}".format(self.state))
@@ -187,7 +196,7 @@ class KeyboardThread(threading.Thread):
         return 
 
     def send_server(self, msg):
-        self.txqueue.put("{0},{1}".format(self.draft.user_name, msg))
+        self.txqueue.put_nowait("{0},{1}".format(self.draft.user_name, msg))
 
 def sync_up(draft, txqueue):
     if len(draft.selections):
@@ -196,7 +205,7 @@ def sync_up(draft, txqueue):
             sync_str += ",{0}".format(draft.selections[i])
         for roster in self.draft.rosters:
             if roster.addr != None:
-                self.txqueue.put(sync_str, roster.addr)
+                self.txqueue.put_nowait(sync_str, roster.addr)
 
 
 def player_generate_fromcsv(line):
@@ -293,6 +302,11 @@ def main():
                         _exit(1)
                     _exit(1)
                     alive = False
+                if draft.done == 1:
+                    print("Draft complete!")
+                    alive = False
+                    _exit(1)
+
     except KeyboardInterrupt:
         _exit(1)
     return

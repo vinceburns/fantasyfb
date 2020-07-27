@@ -16,6 +16,7 @@ class Draft():
         self.players = players
         self.allplayers = copy.copy(players)
         max_name = 10
+        self.done = 0
         for player in players:
             if len(player.name) > max_name:
                 max_name = len(player.name)
@@ -48,6 +49,7 @@ class Draft():
             str =  "loading draft"
             self.logger.logg(str, 1)
         self.current_roster = self.roster[0]
+        self.remaining_picks = (self.n_rosters * self.roster[0].max_players)
 
     def acquire(self):
         self.mutex.acquire()
@@ -120,18 +122,21 @@ class Draft():
         self.current_roster.player_list.append(self.players[player_idx])
         del self.players[player_idx]
         self.total_pick += 1
+        self.remaining_picks -= 1
         self.rd_pick += 1
         if (self.rd_pick == self.n_rosters):
             self.rd_pick = 0
             self.round += 1
         self.current_roster.fill_in()
+        if (self.remaining_picks == 0):
+            self.done = 1
 
         roster_idx = self.rd_pick
         if self.round % 2 != 0:
             #going down the snake. or should i say snek
             roster_idx = ((self.n_rosters-1) - self.rd_pick)
         self.current_roster = self.roster[roster_idx]
-        # time.sleep(1)
+        self.logger.logg("Round:{0}, Pick:{1}, Team:{2}, Total_Picks:{3}, Remaining_Picks:{4}(per team:{5})".format(self.round, self.rd_pick, self.current_roster.name, self.total_pick, self.remaining_picks, round(self.remaining_picks/self.n_rosters)), 1)
 
     def confirm_selection(self, selections, uIn):
         if selections == None:

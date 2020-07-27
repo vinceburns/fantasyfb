@@ -111,7 +111,7 @@ class Roster():
                     player.status = defs.PLAYERSTATUS_KICKER
                 else:
                     self.logger.logg("bench kicker at%d"%(i), 0)
-                    self.bench_player_add()
+                    self.bench_player_add(player)
             else:
                 self.logger.logg("unknown found at%d"%(i), 1)
             i += 1
