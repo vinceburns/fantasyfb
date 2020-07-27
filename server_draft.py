@@ -67,8 +67,7 @@ class ReceiverThread(threading.Thread):
                 else:
                     self.handle_msg(splitter, addr)
             except socket.timeout:
-                out_string = "timeout exception"
-                self.draft.logger.logg(out_string, 1)
+                pass
             # except Exception as ex:
                 # template = "An exception of type {0} occurred. Arguments:\n{1!r}"
                 # message = template.format(type(ex).__name__, ex.args)
@@ -138,6 +137,7 @@ class KeyboardThread(threading.Thread):
                 pass
     def parse_input(self, uIn):
         draft = self.draft
+        print("self.state:{0}".format(self.state))
         if self.state == 0:
             if uIn == "h":
                 draft.logger.logg("help menu\nInput | Function|", 1)
@@ -147,7 +147,8 @@ class KeyboardThread(threading.Thread):
                 draft.logger.logg("4  | resume draft", 1)
                 draft.logger.logg("start fuzzy finding any name to search for a player you would like. See creator for what fuzzy finding means:) (he stole the idea from a vim plugin he uses)", 1)
                 return
-            elif uIn.startswith("1:"):
+            elif uIn.startswith("1"):
+                print("hi")
                 override = 0
                 try:
                     position = uIn.split(':')[1]
@@ -183,6 +184,7 @@ class KeyboardThread(threading.Thread):
             name, player_idx = draft.confirm_selection(self.selections, uIn)
             if (name != None) and (player_idx != None):
                 self.draft.draft_player(player_idx)
+            self.state = 0
         return 
 
     def send_server(self, msg):

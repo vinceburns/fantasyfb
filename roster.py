@@ -29,7 +29,7 @@ class Roster():
         dummy = "Empty"
         for i in range(0, self.max_players):
             self.sorted_playerlist.append(dummy)
-        self.address = None
+        self.addr = None
     def fill_in(self):
         #finish me
         print("HELLO")

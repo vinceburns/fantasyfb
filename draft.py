@@ -28,8 +28,11 @@ class Draft():
         self.selections = []
         filname = 'logs/draft/Draft_' + time.strftime('%m_%d_%y') + '.log'
         self.logger = draftlogging.Logger(filname)
-        filname = 'logs/picks/Draft_picks' + time.strftime('%m_%d_%y_%H') + '.log'
+        filname = 'logs/picks/Draft_picks' + time.strftime('%m_%d_%y_%H_%M_%S') + '.log'
         self.picklogger = filname
+        with open(self.picklogger, 'w+') as f:
+            #ensure it is empty
+            pass
         self.player_csv = player_csv
         self.user_name = name
         for i in range(1, (self.n_rosters+1)):
@@ -109,7 +112,7 @@ class Draft():
     def draft_player(self, player_idx):
         with open(self.picklogger, 'a+') as f:
             #pick | roster_idx | player rank
-            f.write("%d|%d|%d\n"%(self.total_pick, roster_idx, self.players[player_idx].rank))
+            f.write("%d|%d|%d\n"%(self.total_pick, self.current_roster.position - 1, self.players[player_idx].rank))
         self.logger.logg("%s selected %s"%(self.current_roster.name, self.players[player_idx].name), 1)
         self.players[player_idx].pick = self.rd_pick + 1
         self.players[player_idx].overallpick = self.total_pick
@@ -132,17 +135,20 @@ class Draft():
 
     def confirm_selection(self, selections, uIn):
         if selections == None:
-            return None
-        # selection = input("Would you like to select one of those players? if so please send y<selection> for example if you want #10 from that list please send 'y10'\n")
-        uIn = "y:1"
+            return None,None
         if not uIn.startswith("y"):
-            return None
-        player_idx =  int(uIn.split(":", 10)[1])
-        if ((player_idx <= len(selections)) and (player_idx > 0)):
-            return self.draft.players[player_idx-1].name, selections[player_idx-1]
-        else:
-            self.logger.logg("confirm_select fail. player_idx:{0}, len:{1}".format(player_idx, len(selections)), 1)
-            return None
+            return None,None
+        try:
+            player_idx =  int(uIn.split(":", 10)[1])
+            if ((player_idx <= len(selections)) and (player_idx > 0)):
+                return self.players[player_idx-1].name, selections[player_idx-1]
+            else:
+                self.logger.logg("confirm_select fail. player_idx:{0}, len:{1}".format(player_idx, len(selections)), 1)
+                return None,None
+        except:
+            self.logger.logg("An exception occured. please try again with the forma y:<index>", 1)
+            return None,None
+
 
     def sync_draft(self, selections):
         self.players = copy.copy(self.allplayers)
