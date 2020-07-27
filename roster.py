@@ -31,8 +31,6 @@ class Roster():
             self.sorted_playerlist.append(dummy)
         self.addr = None
     def fill_in(self):
-        #finish me
-        print("HELLO")
         self.logger.logg("fill_in", 0)
         self.b_idx = defs.PLAYERSTATUS_BENCH
         dummy = "Empty"
@@ -144,7 +142,6 @@ class Roster():
         out_strin += name_str
         out_strin += " | Pos | Rank | Team | Pick | Ovrall | ADP |" 
         output = out_strin + '\n'
-        self.logger.logg(out_strin, 1)
 
         i = 0
         with open(self.rosterfile,'w') as f:
@@ -157,9 +154,9 @@ class Roster():
                     out_strin = player.print_info(max_name_len, prepend)
                 except AttributeError:
                     out_strin = prepend+"empty"
-                self.logger.logg(out_strin, 1)
                 output += out_strin + "\n"
                 i += 1
+            self.logger.logg(output, 1)
             f.write(output)
             
 

@@ -148,7 +148,6 @@ class KeyboardThread(threading.Thread):
                 draft.logger.logg("start fuzzy finding any name to search for a player you would like. See creator for what fuzzy finding means:) (he stole the idea from a vim plugin he uses)", 1)
                 return
             elif uIn.startswith("1"):
-                print("hi")
                 override = 0
                 try:
                     position = uIn.split(':')[1]
