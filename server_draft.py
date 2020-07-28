@@ -11,6 +11,7 @@ from player import Player
 import msvcrt
 import time
 
+#@note (vburns) this will only work on a windows machine currently due to the winsound requirement
 
 send_address = ("192.168.0.106", 7096)
 confirm_selection_str = "It's your turn. Would you like to select one of those players? if so please send y<selection> for example if you want #10 from that list please send 'y10'\n"
@@ -18,6 +19,34 @@ confirm_selection_str = "It's your turn. Would you like to select one of those p
 '''
 Controls received events and decides to send acks.
 '''
+
+# todo add in timer if time permits
+# class TimerThread(threading.Thread):
+    # def __init__(self, queue, turn_s):
+        # threading.Thread.__init__(self)
+        # self.name = 'TimerThread'
+        # self.queue = queue
+        # self.ts = None
+        # self.pause_ts = None
+        # self.running = 0
+        # self.turn_s = turn_s
+        # self.turn_counter = 0
+
+    # def run(self):
+        # while True:
+            # while not self.queue.empty():
+                # event = self.queue.get()
+                # if (event == "start"):
+                    # self.ts = time.time()
+                    # self.running = 1
+                # elif (event == "pause"):
+                    # self.pause_ts = time.time()
+                    # self.running = 0
+                # elif (event == "resume"):
+                    # self.running = 1
+                # self.queue.task_done()
+            # # print("Send process time:{0}".format(time.time()-self.ts))
+            # time.sleep(1)
 
 class SendingThread(threading.Thread):
     def __init__(self, sock, queue, draft, send_addr):
@@ -39,6 +68,25 @@ class SendingThread(threading.Thread):
             # print("Send process time:{0}".format(time.time()-self.ts))
             time.sleep(.5)
 
+class SendingThread(threading.Thread):
+    def __init__(self, sock, queue, draft, send_addr):
+        threading.Thread.__init__(self)
+        self.name = 'SendingThread'
+        self.sock = sock
+        self.queue = queue
+        self.draft = draft
+        self.send_addr = send_addr
+        self.ts = None
+
+    def run(self):
+        while True:
+            self.ts = time.time()
+            while not self.queue.empty():
+                data, addr = self.queue.get()
+                self.sock.sendto(data.encode(), addr)
+                self.queue.task_done()
+            # print("Send process time:{0}".format(time.time()-self.ts))
+            time.sleep(.5)
 
 class ReceiverThread(threading.Thread):
     def __init__(self, port, keyqueue, txqueue, draft):
@@ -90,12 +138,12 @@ class ReceiverThread(threading.Thread):
                 player_idx = 0
                 for player in self.draft.players:
                     if player.name == p_name and player.rank == p_rank:
-                        self.draft.draft_player(player_idx)
+                        self.draft.draft_player(player_idx, 1)
                 if player_idx == len(self.draft.players):
                     self.txqueue.put_nowait("error",addr)
                 else:
                     self.txqueue.put_nowait("draftack",addr)
-                    self.sync_up(self.draft, self.txqueue)
+                    sync_up(self.draft, self.txqueue)
             else:
                 self.txqueue.put_nowait("error",addr)
 
@@ -134,19 +182,21 @@ class KeyboardThread(threading.Thread):
 
     def run(self):
         while True:
+            uIn = input()
+            # print("In between execute:{0}".format(time.time()-self.ts))
             try:
-                uIn = input()
-                # print("In between execute:{0}".format(time.time()-self.ts))
                 self.ts = time.time()
-                if uIn:
-                    self.parse_input(uIn)
+                self.parse_input(uIn)
             except EOFError:
                 _exit(1)
             # print("Keyboard process time:{0}".format(time.time()-self.ts))
             self.ts = time.time()
     def parse_input(self, uIn):
         draft = self.draft
-        print("self.state:{0}".format(self.state))
+        print("self.state:{0}len:{1}".format(self.state, len(uIn)))
+        if len(uIn) == 0:
+            self.state = 0
+            return
         if self.state == 0:
             if uIn == "h":
                 draft.logger.logg("help menu\nInput | Function|", 1)
@@ -154,6 +204,7 @@ class KeyboardThread(threading.Thread):
                 draft.logger.logg("2  | Print Current Roster", 1)
                 draft.logger.logg("3  | Revert Pick todo", 1)
                 draft.logger.logg("4  | resume draft", 1)
+                draft.logger.logg("5  | starred players check", 1)
                 draft.logger.logg("start fuzzy finding any name to search for a player you would like. See creator for what fuzzy finding means:) (he stole the idea from a vim plugin he uses)", 1)
                 return
             elif uIn.startswith("1"):
@@ -167,8 +218,8 @@ class KeyboardThread(threading.Thread):
                 except:
                     position = None
                 self.selections = draft.show_topavail(position)
-                draft.logger.logg(confirm_selection_str, 1)
                 if ((draft.current_roster.addr == None) or override):
+                    draft.logger.logg(confirm_selection_str, 1)
                     self.state = "confirm_selections"
             elif uIn.startswith("2"):
                 roster = draft.user_roster
@@ -187,11 +238,22 @@ class KeyboardThread(threading.Thread):
                     draft.resume_draft(file_name)
                 except:
                     draft.logger.logg("Invalid file name", 1)
-
+            elif uIn.startswith("5"):
+                draft.check_starred()
+            else:
+                self.selections = draft.player_fzf(uIn)
+                if (len(self.selections) == 0):
+                    return
+                if ((draft.current_roster.addr == None) or override):
+                    draft.logger.logg(confirm_selection_str, 1)
+                    self.state = "confirm_selections"
         elif self.state == "confirm_selections":
             name, player_idx = draft.confirm_selection(self.selections, uIn)
             if (name != None) and (player_idx != None):
-                self.draft.draft_player(player_idx)
+                self.draft.draft_player(player_idx, 1)
+                sync_up(self.draft, self.txqueue)
+            self.state = 0
+        else:
             self.state = 0
         return 
 
@@ -203,9 +265,9 @@ def sync_up(draft, txqueue):
         sync_str = "sync"
         for i in range(0, len(draft.selections)):
             sync_str += ",{0}".format(draft.selections[i])
-        for roster in self.draft.rosters:
+        for roster in draft.roster:
             if roster.addr != None:
-                self.txqueue.put_nowait(sync_str, roster.addr)
+                txqueue.put_nowait(sync_str, roster.addr)
 
 
 def player_generate_fromcsv(line):
@@ -238,10 +300,17 @@ def player_generate_fromcsv(line):
         #unlucky see if it is not a float
         pass
     try:
-        adp = int(adp, 10)
+        adp = int(lis[11], 10)
     except ValueError:
         adp = "No data"
-    player = Player(position, rank, name, team, bye, adp)
+    if len(lis) >= 14:
+        try:
+            starred = int(lis[13], 10)
+        except ValueError:
+            starred = 0
+    else:
+        starred = 0
+    player = Player(position, rank, name, team, bye, adp, starred)
     return player
 
 

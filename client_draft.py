@@ -131,11 +131,16 @@ class KeyboardThread(threading.Thread):
         return
     def parse_input(self, uIn):
         draft = self.draft
+        print("self.state:{0}len:{1}".format(self.state, len(uIn)))
+        if len(uIn) == 0:
+            self.state = 0
+            return
         if self.state == 0:
             if uIn == "h":
                 draft.logger.logg("help menu\nInput | Function|", 1)
                 draft.logger.logg("1  | Print Best available", 1)
                 draft.logger.logg("2  | Print Current Roster", 1)
+                draft.logger.logg("5  | starred players check", 1)
                 draft.logger.logg("start fuzzy finding any name to search for a player you would like. See creator for what fuzzy finding means:) (he stole the idea from a vim plugin he uses)", 1)
                 return
             elif uIn.startswith("1"):
@@ -158,6 +163,15 @@ class KeyboardThread(threading.Thread):
                 except:
                     pass
                 roster.print_roster()
+            elif uIn.startswith("5"):
+                draft.check_starred()
+            else:
+                self.selections = draft.player_fzf(uIn)
+                if (len(self.selections) == 0):
+                    return
+                if draft.my_turn():
+                    draft.logger.logg(confirm_selection_str, 1)
+                    self.state = "confirm_selections"
         elif self.state == "confirm_selections":
             name, player_idx = draft.confirm_selection(self.selections, uIn)
             if (name != None) and (player_idx != None):
@@ -174,7 +188,8 @@ class KeyboardThread(threading.Thread):
                         draft.logger.logg("waiting sync", 1)
                         self.synced = 0
                 draft.logger.logg("turn complete", 1)
-
+        else:
+            self.state = 0
         return 
 
     def send_server(self, msg):
@@ -211,10 +226,17 @@ def player_generate_fromcsv(line):
         #unlucky see if it is not a float
         pass
     try:
-        adp = int(adp, 10)
+        adp = int(lis[11], 10)
     except ValueError:
         adp = "No data"
-    player = Player(position, rank, name, team, bye, adp)
+    if len(lis) >= 14:
+        try:
+            starred = int(lis[13], 10)
+        except ValueError:
+            starred = 0
+    else:
+        starred = 0
+    player = Player(position, rank, name, team, bye, adp, starred)
     return player
 
 

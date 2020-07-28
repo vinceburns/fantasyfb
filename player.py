@@ -6,7 +6,7 @@ import draftlogging
 from defines import Defines as defs
 
 class Player():
-    def __init__(self, position, rank, name, team, bye, adp):
+    def __init__(self, position, rank, name, team, bye, adp, stared):
         self.position = position
         self.rank = rank
         self.name = name
@@ -15,6 +15,7 @@ class Player():
         self.pick = 0
         self.overallpick = 0
         self.adp = adp
+        self.stared = stared
         self.status = defs.PLAYERSTATUS_BENCH
 
     def print_info(self, name_len, prepend):

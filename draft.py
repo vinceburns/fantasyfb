@@ -14,6 +14,10 @@ class Draft():
         self.roster = []
         self.mutex = threading.Lock()
         self.players = players
+        self.starred_players = []
+        for player in self.players:
+            if player.stared == 1:
+                self.starred_players.append(player)
         self.allplayers = copy.copy(players)
         max_name = 10
         self.done = 0
@@ -21,6 +25,7 @@ class Draft():
             if len(player.name) > max_name:
                 max_name = len(player.name)
         self.maxnamelen = max_name
+        print(position)
         self.user_pos = (position - 1)
         self.round = 0
         self.rd_pick = 0
@@ -37,7 +42,7 @@ class Draft():
         self.player_csv = player_csv
         self.user_name = name
         for i in range(1, (self.n_rosters+1)):
-            if i == self.user_pos:
+            if i == position:
                 ros_str = name
             else:
                 ros_str = "comp%d"%(i)
@@ -61,6 +66,69 @@ class Draft():
         if self.current_roster == self.user_roster:
             return True
         return False
+
+    def check_starred(self):
+        if (len(self.starred_players) == 0):
+            self.logger.logg("No stared players", 1)
+            return
+        count = 0
+        risk_list = []
+        next_pick = self.total_pick
+        remaining_picks = self.remaining_picks
+
+        rd_pick = self.rd_pick
+        rd = self.round
+
+        roster_idx = rd_pick
+        user_picks = []
+        while True:
+            if remaining_picks == 0:
+                break
+            if self.user_pos == roster_idx:
+                user_picks.append(next_pick)
+            next_pick += 1
+            remaining_picks -= 1
+            rd_pick += 1
+            if (rd_pick == self.n_rosters):
+                rd_pick = 0
+                rd += 1
+            roster_idx = rd_pick
+            if rd % 2 != 0:
+                #going down the snake. or should i say snek
+                roster_idx = ((self.n_rosters-1) - rd_pick)
+        if len(user_picks) == 0:
+            self.logger.logg("You have no picks remaining", 1)
+            return
+        self.logger.logg("Your picks are:{0}".format(user_picks), 1)
+
+        output = "Player"
+        while (len(output) < self.maxnamelen):
+            output += " "
+        output += " | Message"
+        for player in self.starred_players:
+            output += " \n"
+            msg = ""
+            if (len(user_picks) < 2):
+                msg = "We are near the end of the draft so the risk is high"
+            elif (player.adp < user_picks[0]):
+                msg = "This Players Average draft position is before your next pick So the risk is high"
+            elif (player.rank < user_picks[0]):
+                msg = "This Players rank is lower than your next pick So the risk is high"
+            elif (player.adp < user_picks[1]):
+                msg = "This Players Average draft position is in between your next two picks so the risk is fairly high"
+            elif (player.rank < user_picks[1]):
+                msg = "This Players rank is in between your next two picks so the risk is fairly high"
+            else:
+                msg = "This players rank and ADP is not lower than your next two picks so the risk is fairly low"
+            player_str = player.name
+            while (len(player_str) < self.maxnamelen):
+                player_str += " "
+            #don't know why this is needed
+            player_str += " "
+            player_str += "| {0}".format(msg)
+            output += player_str
+        self.logger.logg(output, 1)
+        return
 
     def show_topavail(self, pos):
         filterlist = []
@@ -111,7 +179,7 @@ class Draft():
         self.logger.logg(printer, 1)
         return return_list
 
-    def draft_player(self, player_idx):
+    def draft_player(self, player_idx, is_server):
         with open(self.picklogger, 'a+') as f:
             #pick | roster_idx | player rank
             f.write("%d|%d|%d\n"%(self.total_pick, self.current_roster.position - 1, self.players[player_idx].rank))
@@ -120,6 +188,10 @@ class Draft():
         self.players[player_idx].overallpick = self.total_pick
         self.selections.append(self.players[player_idx].rank)
         self.current_roster.player_list.append(self.players[player_idx])
+        for i in range(0, len(self.starred_players)):
+            if (self.players[player_idx].rank == self.starred_players[i].rank):
+                del self.starred_players[i]
+                break
         del self.players[player_idx]
         self.total_pick += 1
         self.remaining_picks -= 1
@@ -137,6 +209,8 @@ class Draft():
             roster_idx = ((self.n_rosters-1) - self.rd_pick)
         self.current_roster = self.roster[roster_idx]
         self.logger.logg("Round:{0}, Pick:{1}, Team:{2}, Total_Picks:{3}, Remaining_Picks:{4}(per team:{5})".format(self.round, self.rd_pick, self.current_roster.name, self.total_pick, self.remaining_picks, round(self.remaining_picks/self.n_rosters)), 1)
+        if is_server and self.my_turn():
+            self.logger.logg("Your are on the Clock!!!!", 1)
 
     def confirm_selection(self, selections, uIn):
         if selections == None:
@@ -172,10 +246,51 @@ class Draft():
                 self.logger.logg("invalid player selection", 1)
                 sys.exit(2)
 
-            self.draft_player(player_idx)
+            self.draft_player(player_idx, 0)
 
         self.logger.logg("total_pick:{0} len:{1}".format(self.total_pick, len(selections)), 1)
+        if self.my_turn():
+            self.logger.logg("Your are on the Clock!!!!", 1)
         return True
+
+    def player_fzf(self, string):
+        test_list = []
+        return_list = []
+        i = 0
+        for player in self.players:
+            test_list.append(player.name.lower())
+        string = string.lower()
+        for i in range(0, len(test_list)):
+            name = test_list[i]
+            if is_fzfmatch(string, name) == True:
+                #append the player index
+                return_list.append(i)
+        out_strin = "#  | "
+
+        name_str = "Name"
+        while (len(name_str) < self.maxnamelen):
+            name_str += " "
+        out_strin += name_str
+        out_strin += " | Pos | Rank | Team | Pick | Ovrall | ADP |" 
+        self.logger.logg(out_strin, 1)
+        count = 0
+        printer = ''
+        player_idx = 0
+        for i in range(0, len(return_list)):
+            if count >= 20:
+                break
+            count += 1
+            player_idx = return_list[i]
+            printer += self.players[player_idx].print_info(self.maxnamelen, "%02d | "%(count))
+            printer += "\n"
+
+        if (len(return_list) > 0):
+            self.logger.logg(printer, 1)
+        else:
+            self.logger.logg("Sorry, could not find that pattern in any player's names.", 1)
+            self.logger.logg("Please Try again", 1)
+
+        return return_list
 
     def resume_draft(self, file_name):
         selections = []
@@ -194,5 +309,18 @@ class Draft():
             self.logger.logg("Invalid Log file!",1)
 
 
+def is_fzfmatch(match_str, check_str):
+    for match_char in range(0, len(match_str)):
+        found = 0
+        for check_char in range(0, len(check_str)):
+            if match_str[match_char] == check_str[check_char]:
+                #we found this char trucate string and move to next match char
+                found = 1
+                if check_char != len(check_str):
+                    check_str = check_str[check_char::]
+                break
+        if found == 0:
+            return False
+    return True
 if __name__ == '__main__':
     main()
