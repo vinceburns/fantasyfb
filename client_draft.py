@@ -31,7 +31,7 @@ class SendingThread(threading.Thread):
             while not self.queue.empty():
                 data = self.queue.get()
                 self.draft.logger.logg("Sending Thread! {0}".format(data), 1)
-                self.sock.sendto(data, self.send_addr)
+                self.sock.sendto(data.encode(), self.send_addr)
             time.sleep(1)
 
 
