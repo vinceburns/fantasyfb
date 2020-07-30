@@ -8,7 +8,6 @@ from multiprocessing import *
 from draft import Draft
 from roster import Roster
 from player import Player
-import msvcrt
 import time
 
 #@note (vburns) this will only work on a windows machine currently due to the winsound requirement
@@ -63,26 +62,7 @@ class SendingThread(threading.Thread):
             self.ts = time.time()
             while not self.queue.empty():
                 data, addr = self.queue.get()
-                self.draft.logger.logg("Sending Thread! {0} to {1}".format(data, addr), 1)
-                self.sock.sendto(data.encode(), addr)
-            # print("Send process time:{0}".format(time.time()-self.ts))
-            time.sleep(.5)
-
-class SendingThread(threading.Thread):
-    def __init__(self, sock, queue, draft, send_addr):
-        threading.Thread.__init__(self)
-        self.name = 'SendingThread'
-        self.sock = sock
-        self.queue = queue
-        self.draft = draft
-        self.send_addr = send_addr
-        self.ts = None
-
-    def run(self):
-        while True:
-            self.ts = time.time()
-            while not self.queue.empty():
-                data, addr = self.queue.get()
+                print("Sending Thread! {0} to {1}".format(data, addr))
                 self.sock.sendto(data.encode(), addr)
             # print("Send process time:{0}".format(time.time()-self.ts))
             time.sleep(.5)
@@ -112,7 +92,7 @@ class ReceiverThread(threading.Thread):
                 out_string = (strftime("[%H:%M:%S] ",localtime()) + str(data) + " from " + str(addr[0]) + ":" + str(addr[1]))
                 self.draft.logger.logg(out_string, 1)
                 splitter = data.decode().split(",")
-                #@todo (vburns) move all of these strings to defines that client and server can share
+                print(splitter)
                 if (str(splitter[0]) == "init"):
                     self.init_roster(splitter, addr)
                 else:
@@ -148,7 +128,6 @@ class ReceiverThread(threading.Thread):
     def init_roster(self, splitter, addr):
         found = 0
         #todo check to make sure this name isn't already being used
-        print(splitter[1],splitter[2])
         if ((splitter[1].startswith("name=") == False) or \
                 (splitter[2].startswith("pos=") == False)):
             return
@@ -159,13 +138,14 @@ class ReceiverThread(threading.Thread):
             draft.logger.logg("invalid pos", 1)
             return
 
+        self.draft.logger.logg("name:{0}, pos:{1}".format(r_name, r_pos), 1)
         for roster in self.draft.roster:
-            print(roster.position, r_pos)
             if roster.position == r_pos:
-                roster.address = addr
+                roster.addr = addr
                 roster.name = r_name
                 found = 1
                 break
+
         if found == 1:
             self.txqueue.put_nowait(("init,success", addr))
             if len(self.draft.selections):
@@ -215,6 +195,7 @@ class KeyboardThread(threading.Thread):
                 draft.logger.logg("3  | Revert Pick todo", 1)
                 draft.logger.logg("4  | resume draft", 1)
                 draft.logger.logg("5  | starred players check", 1)
+                draft.logger.logg("6  | roster_addrs", 1)
                 draft.logger.logg("start fuzzy finding any name to search for a player you would like. See creator for what fuzzy finding means:) (he stole the idea from a vim plugin he uses)", 1)
                 return
             elif uIn.startswith("1"):
@@ -250,6 +231,9 @@ class KeyboardThread(threading.Thread):
                     draft.logger.logg("Invalid file name", 1)
             elif uIn.startswith("5"):
                 draft.check_starred()
+            elif uIn.startswith("6"):
+                for roster in draft.roster:
+                    print(roster.name, roster.addr)
             else:
                 self.selections = draft.player_fzf(uIn)
                 if (len(self.selections) == 0):
@@ -268,12 +252,15 @@ class KeyboardThread(threading.Thread):
         return 
 
 def sync_up(draft, txqueue):
+    print("sync_up{0}".format(len(draft.selections)))
     if len(draft.selections):
         sync_str = "sync"
         for i in range(0, len(draft.selections)):
             sync_str += ",{0}".format(draft.selections[i])
         for roster in draft.roster:
+            print("addr{0}".format(roster.addr))
             if roster.addr != None:
+                print("{0}".format(sync_str))
                 txqueue.put_nowait((sync_str, roster.addr))
 
 
