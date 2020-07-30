@@ -66,7 +66,7 @@ class ReceiverThread(threading.Thread):
                 if splitter[0] == "sync":
                     selections = []
                     for i in range(1, len(splitter)):
-                        selections = int(splitter[i])
+                        selections.append(int(splitter[i]))
                     self.draft.sync_draft(selections)
                     self.keyqueue.put_nowait("sync")
                 if splitter[0] == "error":
