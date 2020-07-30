@@ -25,7 +25,6 @@ class Draft():
             if len(player.name) > max_name:
                 max_name = len(player.name)
         self.maxnamelen = max_name
-        print(position)
         self.user_pos = (position - 1)
         self.round = 0
         self.rd_pick = 0

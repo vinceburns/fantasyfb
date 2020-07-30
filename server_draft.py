@@ -63,8 +63,8 @@ class SendingThread(threading.Thread):
             self.ts = time.time()
             while not self.queue.empty():
                 data, addr = self.queue.get()
+                self.draft.logger.logg("Sending Thread! {0} to {1}".format(data, addr), 1)
                 self.sock.sendto(data.encode(), addr)
-                self.queue.task_done()
             # print("Send process time:{0}".format(time.time()-self.ts))
             time.sleep(.5)
 
@@ -84,7 +84,6 @@ class SendingThread(threading.Thread):
             while not self.queue.empty():
                 data, addr = self.queue.get()
                 self.sock.sendto(data.encode(), addr)
-                self.queue.task_done()
             # print("Send process time:{0}".format(time.time()-self.ts))
             time.sleep(.5)
 
@@ -110,12 +109,11 @@ class ReceiverThread(threading.Thread):
             try:
                 self.ts = time.time()
                 data, addr = self.sock.recvfrom(4096)
-                data = str(data)
                 out_string = (strftime("[%H:%M:%S] ",localtime()) + str(data) + " from " + str(addr[0]) + ":" + str(addr[1]))
                 self.draft.logger.logg(out_string, 1)
-                splitter = data.split(",")
+                splitter = data.decode().split(",")
                 #@todo (vburns) move all of these strings to defines that client and server can share
-                if splitter[0] == "init":
+                if (str(splitter[0]) == "init"):
                     self.init_roster(splitter, addr)
                 else:
                     self.handle_msg(splitter, addr)
@@ -140,31 +138,43 @@ class ReceiverThread(threading.Thread):
                     if player.name == p_name and player.rank == p_rank:
                         self.draft.draft_player(player_idx, 1)
                 if player_idx == len(self.draft.players):
-                    self.txqueue.put_nowait("error",addr)
+                    self.txqueue.put_nowait(("error",addr))
                 else:
-                    self.txqueue.put_nowait("draftack",addr)
+                    self.txqueue.put_nowait(("draftack",addr))
                     sync_up(self.draft, self.txqueue)
             else:
-                self.txqueue.put_nowait("error",addr)
+                self.txqueue.put_nowait(("error",addr))
 
     def init_roster(self, splitter, addr):
         found = 0
         #todo check to make sure this name isn't already being used
+        print(splitter[1],splitter[2])
+        if ((splitter[1].startswith("name=") == False) or \
+                (splitter[2].startswith("pos=") == False)):
+            return
+        r_name = splitter[1].split("=")[1]
+        try:
+            r_pos = int(splitter[2].split("=")[1], 10)
+        except:
+            draft.logger.logg("invalid pos", 1)
+            return
+
         for roster in self.draft.roster:
-            if roster.pos == pos:
+            print(roster.position, r_pos)
+            if roster.position == r_pos:
                 roster.address = addr
-                roster.name = name
+                roster.name = r_name
                 found = 1
                 break
         if found == 1:
-            self.txqueue.put_nowait("init,success", addr)
+            self.txqueue.put_nowait(("init,success", addr))
             if len(self.draft.selections):
                 sync_str = "sync"
                 for i in range(0, len(self.draft.selections)):
                     sync_str += ",{0}".format(self.draft.selections[i])
-                self.txqueue.put_nowait(sync_str, addr)
+                self.txqueue.put_nowait((sync_str, addr))
         else:
-            self.txqueue.put_nowait("init,failure", addr)
+            self.txqueue.put_nowait(("init,failure", addr))
 
 class KeyboardThread(threading.Thread):
     def __init__(self, draft, txqueue, rxqueue):
@@ -257,9 +267,6 @@ class KeyboardThread(threading.Thread):
             self.state = 0
         return 
 
-    def send_server(self, msg):
-        self.txqueue.put_nowait("{0},{1}".format(self.draft.user_name, msg))
-
 def sync_up(draft, txqueue):
     if len(draft.selections):
         sync_str = "sync"
@@ -267,7 +274,7 @@ def sync_up(draft, txqueue):
             sync_str += ",{0}".format(draft.selections[i])
         for roster in draft.roster:
             if roster.addr != None:
-                txqueue.put_nowait(sync_str, roster.addr)
+                txqueue.put_nowait((sync_str, roster.addr))
 
 
 def player_generate_fromcsv(line):

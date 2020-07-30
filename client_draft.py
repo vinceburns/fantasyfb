@@ -31,7 +31,7 @@ class SendingThread(threading.Thread):
             while not self.queue.empty():
                 data = self.queue.get()
                 self.draft.logger.logg("Sending Thread! {0}".format(data), 1)
-                self.sock.sendto(data.encode(), self.send_addr)
+                self.sock.sendto(data, self.send_addr)
             time.sleep(1)
 
 
@@ -59,11 +59,10 @@ class ReceiverThread(threading.Thread):
             try:
 
                 data, addr = self.sock.recvfrom(4096)
-                data = str(data)
                 out_string = (strftime("[%H:%M:%S] ",localtime()) + str(data) + " from " + str(addr[0]) + ":" + str(addr[1]))
                 self.draft.acquire()
                 self.draft.logger.logg(out_string, 1)
-                splitter = data.split(",")
+                splitter = data.decode().split(",")
                 if splitter[0] == "sync":
                     selections = []
                     for i in range(1, len(splitter)):
