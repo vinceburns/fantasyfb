@@ -24,7 +24,7 @@ class Roster():
         self.b_idx = defs.PLAYERSTATUS_BENCH
         self.rosterfile = "rosters/%d_roster.ros"%(self.position)
         self.player_csv = player_csv
-        with open(self.player_csv,'r') as f:
+        with open(self.player_csv,'r+') as f:
             self.logger.logg("able to open file", 0)
         dummy = "Empty"
         for i in range(0, self.max_players):
@@ -144,7 +144,7 @@ class Roster():
         output = out_strin + '\n'
 
         i = 0
-        with open(self.rosterfile,'w') as f:
+        with open(self.rosterfile,'w+') as f:
             for player in self.sorted_playerlist:
                 if i < defs.PLAYERSTATUS_BENCH:
                     prepend = prepend_printlist[i]
