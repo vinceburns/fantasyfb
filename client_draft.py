@@ -54,9 +54,8 @@ class ReceiverThread(threading.Thread):
     def run(self):
         while True:
             if self.connected == 0:
-                init_string = "init,name={0},pos={1}".format(self.draft.user_pos, self.draft.user_name)
+                init_string = "init,name={0},pos={1}".format(self.draft.user_name, self.draft.user_pos)
                 self.txqueue.put_nowait(init_string)
-                self.draft.logger.logg("init put!", 1)
             try:
 
                 data, addr = self.sock.recvfrom(4096)
