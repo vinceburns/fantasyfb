@@ -232,13 +232,18 @@ class Draft():
         self.players = copy.copy(self.allplayers)
         self.round = 0
         self.rd_pick = 0
-        self.total_pick = 0
+        self.total_pick = 1
         self.selections = []
-        while (self.total_pick < len(selections)):
+        self.current_roster = self.roster[0]
+        for roster in self.roster:
+            roster.player_list = []
+            for i in range(0, roster.max_players):
+                roster.sorted_playerlist[i] = "Empty"
+        while (self.total_pick < (len(selections)) + 1):
             self.logger.logg("round:{0} roster:{1} self.rd_pick:{2}".format(self.round, self.current_roster.name, self.rd_pick), 1)
             player_idx = len(self.players)
             for i in range(0, len(self.players)):
-                if self.players[i].rank == selections[self.total_pick]:
+                if self.players[i].rank == selections[self.total_pick-1]:
                     player_idx = i
                     break;
             if (player_idx == len(self.players)):

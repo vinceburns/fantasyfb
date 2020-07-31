@@ -17,36 +17,16 @@ confirm_selection_str = "It's your turn. Would you like to select one of those p
 Controls received events and decides to send acks.
 '''
 
-class SendingThread(threading.Thread):
-    def __init__(self, sock, queue, draft, send_addr):
+class ServerThread(threading.Thread):
+    def __init__(self, port, txqueue, draft, server_addr):
         threading.Thread.__init__(self)
-        self.name = 'SendingThread'
-        self.sock = sock
-        self.queue = queue
-        self.draft = draft
-        self.send_addr = send_addr
-
-    def run(self):
-        while True:
-            while not self.queue.empty():
-                data = self.queue.get()
-                self.draft.logger.logg("Sending Thread! {0}".format(data), 1)
-                self.sock.sendto(data.encode(), self.send_addr)
-            time.sleep(1)
-
-
-class ReceiverThread(threading.Thread):
-    def __init__(self, port, keyqueue, txqueue, draft):
-        threading.Thread.__init__(self)
-        self.keyqueue = keyqueue
-        self.name = 'ReceiverThread'
+        self.name = 'ServerThread'
         self.txqueue = txqueue
         self.draft = draft
 
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.sock.setblocking(1)
-        self.sock.settimeout(10)
-        self.sock.bind(('',port))
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.connect(server_addr)
+        self.sock.settimeout(1)
         out_string = "Socket open on {}! Listening...".format(port)
         self.draft.logger.logg(out_string, 1)
         self.connected = 0
@@ -55,7 +35,7 @@ class ReceiverThread(threading.Thread):
         while True:
             if self.connected == 0:
                 init_string = "init,name={0},pos={1}".format(self.draft.user_name, self.draft.user_pos)
-                self.txqueue.put_nowait(init_string)
+                self.sock.sendall(init_string.encode())
             try:
 
                 data, addr = self.sock.recvfrom(4096)
@@ -68,27 +48,26 @@ class ReceiverThread(threading.Thread):
                     for i in range(1, len(splitter)):
                         selections.append(int(splitter[i]))
                     self.draft.sync_draft(selections)
-                    self.keyqueue.put_nowait("sync")
                 if splitter[0] == "error":
-                    self.keyqueue.put_nowait(data)
-                    self.send_server("ack")
+                    self.sock.sendall("ack".encode())
                 if splitter[0] == "draftack":
-                    self.keyqueue.put_nowait(data)
-                    self.send_server("ack")
+                    self.sock.sendall("ack".encode())
                 if splitter[0] == "init":
                     if splitter[1] == "success":
                         self.connected = 1
                 self.draft.release()
             except socket.timeout:
-                out_string = "timeout exception"
-                self.draft.logger.logg(out_string, 1)
+                pass
             except Exception as ex:
                 template = "An exception of type {0} occurred. Arguments:\n{1!r}"
                 message = template.format(type(ex).__name__, ex.args)
                 print(message)
+            while not self.txqueue.empty():
+                data = self.txqueue.get()
+                self.draft.logger.logg("Sending Thread! {0}".format(data), 1)
+                self.sock.sendall(data.encode())
+            self.sock.sendall("ping".encode())
 
-    def send_server(self, msg):
-        self.txqueue.put_nowait("{0},{1},{2}".format(self.draft.user_roster.name, self.draft.user_roster.pos, msg))
 
 class KeyboardThread(threading.Thread):
     def __init__(self, draft, txqueue, rxqueue):
@@ -191,7 +170,7 @@ class KeyboardThread(threading.Thread):
         return 
 
     def send_server(self, msg):
-        self.txqueue.put_nowait("{0},{1},{2}".format(self.draft.user_roster.name, self.draft.user_roster.pos, msg))
+        self.txqueue.put_nowait(msg)
 
 
 def player_generate_fromcsv(line):
@@ -271,12 +250,11 @@ def main():
     draft = Draft(position, name, players, n_rosters, player_csv)
     txqueue = Queue()
     keyboard_rxqueue = Queue()
-
-    receive_thr = ReceiverThread(port, keyboard_rxqueue, txqueue, draft)
     threadpool = []
-    threadpool.append(receive_thr)
-    send_thr = SendingThread(receive_thr.sock, txqueue, draft, send_address)
-    threadpool.append(send_thr)
+
+    server_thr = ServerThread(port, txqueue, draft, send_address)
+
+    threadpool.append(server_thr)
     key_thr = KeyboardThread(draft, txqueue, keyboard_rxqueue)
 
     threadpool.append(key_thr)

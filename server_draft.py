@@ -18,70 +18,24 @@ confirm_selection_str = "It's your turn. Would you like to select one of those p
 '''
 Controls received events and decides to send acks.
 '''
+conn_threads = []
+key_thr = None
+debug = 0
 
-# todo add in timer if time permits
-# class TimerThread(threading.Thread):
-    # def __init__(self, queue, turn_s):
-        # threading.Thread.__init__(self)
-        # self.name = 'TimerThread'
-        # self.queue = queue
-        # self.ts = None
-        # self.pause_ts = None
-        # self.running = 0
-        # self.turn_s = turn_s
-        # self.turn_counter = 0
-
-    # def run(self):
-        # while True:
-            # while not self.queue.empty():
-                # event = self.queue.get()
-                # if (event == "start"):
-                    # self.ts = time.time()
-                    # self.running = 1
-                # elif (event == "pause"):
-                    # self.pause_ts = time.time()
-                    # self.running = 0
-                # elif (event == "resume"):
-                    # self.running = 1
-                # self.queue.task_done()
-            # # print("Send process time:{0}".format(time.time()-self.ts))
-            # time.sleep(1)
-
-class SendingThread(threading.Thread):
-    def __init__(self, sock, queue, draft, send_addr):
-        threading.Thread.__init__(self)
-        self.name = 'SendingThread'
-        self.sock = sock
-        self.queue = queue
-        self.draft = draft
-        self.send_addr = send_addr
-        self.ts = None
-
-    def run(self):
-        while True:
-            self.ts = time.time()
-            while not self.queue.empty():
-                data, addr = self.queue.get()
-                print("Sending Thread! {0} to {1}".format(data, addr))
-                self.sock.sendto(data.encode(), addr)
-            # print("Send process time:{0}".format(time.time()-self.ts))
-            time.sleep(.5)
-
-class ReceiverThread(threading.Thread):
-    def __init__(self, port, keyqueue, txqueue, draft):
+class ClientThread(threading.Thread):
+    def __init__(self, conn, keyqueue, txqueue, draft, addr, index):
         threading.Thread.__init__(self)
         self.keyqueue = keyqueue
-        self.name = 'ReceiverThread'
         self.txqueue = txqueue
+        self.index = index
+        self.debug = 0
+        self.name = 'ClientThread' + str(index)
         self.draft = draft
+        self.sock = conn
+        self.addr = addr
+        self.initialized = 0
+        self.roster = None
 
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.sock.setblocking(0)
-        self.sock.settimeout(3)
-        self.sock.bind(('',port))
-        out_string = "Socket open on {}! Listening...".format(port)
-        self.draft.logger.logg(out_string, 1)
-        self.connected = 0
         self.ts = None
 
     def run(self):
@@ -89,43 +43,45 @@ class ReceiverThread(threading.Thread):
             try:
                 self.ts = time.time()
                 data, addr = self.sock.recvfrom(4096)
-                out_string = (strftime("[%H:%M:%S] ",localtime()) + str(data) + " from " + str(addr[0]) + ":" + str(addr[1]))
-                self.draft.logger.logg(out_string, 1)
+                #here initialize
+                out_string = (strftime("[%H:%M:%S] ",localtime()) + str(data) + " from " + self.name)
+                self.draft.logger.logg(out_string, self.debug)
                 splitter = data.decode().split(",")
-                print(splitter)
                 if (str(splitter[0]) == "init"):
-                    self.init_roster(splitter, addr)
+                    self.init_roster(splitter)
                 else:
-                    self.handle_msg(splitter, addr)
+                    self.handle_msg(splitter)
             except socket.timeout:
-                pass
-            # except Exception as ex:
+                return
+            while not self.txqueue.empty():
+                data = self.txqueue.get()
+                self.sock.sendall(data.encode())
+                # except Exception as ex:
                 # template = "An exception of type {0} occurred. Arguments:\n{1!r}"
                 # message = template.format(type(ex).__name__, ex.args)
                 # print(message)
             # print("Recv process time:{0}".format(time.time()-self.ts))
-    def handle_msg(self, splitter, addr):
-        if splitter[0] == "draft_player":
-            r_name = splitter[1]
-            r_pos = splitter[2]
-            if (self.draft.current_roster.name == r_name) and \
-                splitter[3].startswith("p_name=") and splitter[4].startswith("p_rank=") and \
-                addr == self.current_roster.addr:
-                p_name = splitter[3].split("=",1)[1]
-                p_rank = splitter[4].split("=",1)[1]
+    def handle_msg(self, splitter):
+        if (splitter[0] == "draft_player"):
+            if ((self.draft.current_roster.name == self.roster) and splitter[1].startswith("p_name=") and splitter[2].startswith("p_rank=")):
+                p_name = splitter[1].split("=",1)[1]
+                p_rank = splitter[2].split("=",1)[1]
                 player_idx = 0
                 for player in self.draft.players:
                     if player.name == p_name and player.rank == p_rank:
+                        self.draft.acquire()
                         self.draft.draft_player(player_idx, 1)
+                        self.draft.release()
                 if player_idx == len(self.draft.players):
-                    self.txqueue.put_nowait(("error",addr))
+                    self.socket.sendall("error".encode())
                 else:
-                    self.txqueue.put_nowait(("draftack",addr))
-                    sync_up(self.draft, self.txqueue)
+                    self.sendall("draftack".encode())
+                    #here
+                    sync_up(self.draft)
             else:
-                self.txqueue.put_nowait(("error",addr))
+                self.socket.sendall("error")
 
-    def init_roster(self, splitter, addr):
+    def init_roster(self, splitter):
         found = 0
         #todo check to make sure this name isn't already being used
         if ((splitter[1].startswith("name=") == False) or \
@@ -141,28 +97,27 @@ class ReceiverThread(threading.Thread):
         self.draft.logger.logg("name:{0}, pos:{1}".format(r_name, r_pos), 1)
         for roster in self.draft.roster:
             if roster.position == r_pos:
-                roster.addr = addr
                 roster.name = r_name
+                self.name = r_name
                 found = 1
                 break
 
         if found == 1:
-            self.txqueue.put_nowait(("init,success", addr))
+            self.sock.sendall("init,success".encode())
             if len(self.draft.selections):
                 sync_str = "sync"
                 for i in range(0, len(self.draft.selections)):
                     sync_str += ",{0}".format(self.draft.selections[i])
-                self.txqueue.put_nowait((sync_str, addr))
+                self.sock.sendall(sync_str.encode())
         else:
-            self.txqueue.put_nowait(("init,failure", addr))
+            self.sock.sendall("init,failure".encode())
 
 class KeyboardThread(threading.Thread):
-    def __init__(self, draft, txqueue, rxqueue):
+    def __init__(self, draft, rxqueue):
         threading.Thread.__init__(self)
         self.name = 'KeyboardThread'
         self.draft = draft
         self.rxqueue = rxqueue
-        self.txqueue = txqueue
         self.state = 0
         self.synced = 0
         self.selected = 0
@@ -234,6 +189,22 @@ class KeyboardThread(threading.Thread):
             elif uIn.startswith("6"):
                 for roster in draft.roster:
                     print(roster.name, roster.addr)
+            elif uIn.startswith("!de:"):
+                try:
+                    idx = int(uIn.split(":", 1)[1], 10)
+                    if (idx < len(conn_threads)):
+                        conn_threads[idx].debug = 1
+                        draft.logger.logg("Enabling {0}'s debugs!".format(conn_threads[idx].name), 1)
+                except:
+                    return
+            elif uIn.startswith("!dd:"):
+                try:
+                    idx = int(uIn.split(":", 1)[1], 10)
+                    if (idx < len(conn_threads)):
+                        conn_threads[idx].debug = 0
+                        draft.logger.logg("Disabling {0}'s debugs!".format(conn_threads[idx].name), 1)
+                except:
+                    return
             else:
                 self.selections = draft.player_fzf(uIn)
                 if (len(self.selections) == 0):
@@ -244,24 +215,28 @@ class KeyboardThread(threading.Thread):
         elif self.state == "confirm_selections":
             name, player_idx = draft.confirm_selection(self.selections, uIn)
             if (name != None) and (player_idx != None):
+                self.draft.acquire()
                 self.draft.draft_player(player_idx, 1)
-                sync_up(self.draft, self.txqueue)
+                self.draft.release()
+                sync_up(self.draft)
             self.state = 0
         else:
             self.state = 0
         return 
 
-def sync_up(draft, txqueue):
+def sync_up(draft):
     print("sync_up{0}".format(len(draft.selections)))
     if len(draft.selections):
         sync_str = "sync"
         for i in range(0, len(draft.selections)):
             sync_str += ",{0}".format(draft.selections[i])
-        for roster in draft.roster:
-            print("addr{0}".format(roster.addr))
-            if roster.addr != None:
+        for t in conn_threads:
+            print("addr{0}".format(t.addr))
+            if (t.is_alive()):
                 print("{0}".format(sync_str))
-                txqueue.put_nowait((sync_str, roster.addr))
+                t.txqueue.put_nowait(sync_str)
+            else:
+                print (t.is_alive())
 
 
 def player_generate_fromcsv(line):
@@ -340,38 +315,43 @@ def main():
 
     draft = Draft(position, name, players, n_rosters, player_csv)
 
-    txqueue = Queue()
     keyboard_rxqueue = Queue()
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.bind(('',port))
+    sock.listen(1)
 
-    receive_thr = ReceiverThread(port, keyboard_rxqueue, txqueue, draft)
-    threadpool = []
-    threadpool.append(receive_thr)
-    send_thr = SendingThread(receive_thr.sock, txqueue, draft, send_address)
-    threadpool.append(send_thr)
-    key_thr = KeyboardThread(draft, txqueue, keyboard_rxqueue)
+    key_thr = KeyboardThread(draft, keyboard_rxqueue)
 
-    threadpool.append(key_thr)
+    key_thr.start()
+    while True:
+        conn, addr = sock.accept()
+        draft.logger.logg("New conn! addr:{0}".format(addr), 1)
+        q = Queue()
+        conn.settimeout(5)
+        new_thread = ClientThread(conn, keyboard_rxqueue, q, draft, addr, len(conn_threads))
+        new_thread.start()
 
-    for t in threadpool:
-        t.start()
-    alive = True
-    try:
-        while alive:
-            for t in threadpool:
-                if not t.is_alive():
-                    try:
-                        print(t.name + " has died! Exiting.")
-                    except:
-                        _exit(1)
-                    _exit(1)
-                    alive = False
-                if draft.done == 1:
-                    print("Draft complete!")
-                    alive = False
-                    _exit(1)
+        conn_threads.append(new_thread)
+        i = 0
+        deleted = 0
 
-    except KeyboardInterrupt:
-        _exit(1)
+        print("hello")
+        while (i < len(conn_threads)):
+            if (conn_threads[i].is_alive() == False):
+                draft.logger.logg("Dead Thread {0}".format(addr), 1)
+                conn_threads[i].sock.close()
+                conn_threads.pop(i)
+            i += 1
+        if deleted:
+            i = 0
+            while (i < len(conn_threads)):
+                conn_threads[i].index = i
+        if (key_thr.is_alive() == False):
+            _exit(1)
+
+        time.sleep(1)
+
+    _exit(1)
     return
 
 if __name__ == '__main__':
