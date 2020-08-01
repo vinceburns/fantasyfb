@@ -46,11 +46,13 @@ class ClientThread(threading.Thread):
                 #here initialize
                 out_string = (strftime("[%H:%M:%S] ",localtime()) + str(data) + " from " + self.name)
                 self.draft.logger.logg(out_string, self.debug)
-                splitter = data.decode().split(",")
-                if (str(splitter[0]) == "init"):
-                    self.init_roster(splitter)
-                else:
-                    self.handle_msg(splitter)
+                msgs = (data.decode().split("|"))
+                for msg in msgs:
+                    splitter = msg.split(",")
+                    if (str(splitter[0]) == "init"):
+                        self.init_roster(splitter)
+                    else:
+                        self.handle_msg(splitter)
             except socket.timeout:
                 return
             while not self.txqueue.empty():

@@ -35,9 +35,8 @@ class ServerThread(threading.Thread):
         while True:
             if self.connected == 0:
                 init_string = "init,name={0},pos={1}".format(self.draft.user_name, self.draft.user_pos)
-                self.sock.sendall(init_string.encode())
+                self.sock.sendall((init_string + "|").encode())
             try:
-
                 data, addr = self.sock.recvfrom(4096)
                 out_string = (strftime("[%H:%M:%S] ",localtime()) + str(data) + " from " + str(addr[0]) + ":" + str(addr[1]))
                 self.draft.acquire()
@@ -49,9 +48,9 @@ class ServerThread(threading.Thread):
                         selections.append(int(splitter[i]))
                     self.draft.sync_draft(selections)
                 if splitter[0] == "error":
-                    self.sock.sendall("ack".encode())
+                    self.sock.sendall("ack|".encode())
                 if splitter[0] == "draftack":
-                    self.sock.sendall("ack".encode())
+                    self.sock.sendall("ack|".encode())
                 if splitter[0] == "init":
                     if splitter[1] == "success":
                         self.connected = 1
@@ -65,8 +64,8 @@ class ServerThread(threading.Thread):
             while not self.txqueue.empty():
                 data = self.txqueue.get()
                 self.draft.logger.logg("Sending Thread! {0}".format(data), 1)
-                self.sock.sendall(data.encode())
-            self.sock.sendall("ping".encode())
+                self.sock.sendall((data+"|").encode())
+            self.sock.sendall("ping|".encode())
 
 
 class KeyboardThread(threading.Thread):
