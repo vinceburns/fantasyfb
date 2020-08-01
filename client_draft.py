@@ -38,7 +38,7 @@ class ServerThread(threading.Thread):
                 self.sock.sendall((init_string + "|").encode())
             try:
                 data, addr = self.sock.recvfrom(4096)
-                out_string = (strftime("[%H:%M:%S] ",localtime()) + str(data) + " from " + str(addr[0]) + ":" + str(addr[1]))
+                out_string = (strftime("[%H:%M:%S] ",localtime()) + str(data))
                 self.draft.acquire()
                 self.draft.logger.logg(out_string, 1)
                 splitter = data.decode().split(",")
