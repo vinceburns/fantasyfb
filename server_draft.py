@@ -75,13 +75,13 @@ class ClientThread(threading.Thread):
                         self.draft.draft_player(player_idx, 1)
                         self.draft.release()
                 if player_idx == len(self.draft.players):
-                    self.socket.sendall("error".encode())
+                    self.sock.sendall("error".encode())
                 else:
                     self.sendall("draftack".encode())
                     #here
                     sync_up(self.draft)
             else:
-                self.socket.sendall("error")
+                self.sock.sendall("error")
 
     def init_roster(self, splitter):
         found = 0
