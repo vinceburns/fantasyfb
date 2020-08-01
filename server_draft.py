@@ -57,7 +57,7 @@ class ClientThread(threading.Thread):
                 return
             while not self.txqueue.empty():
                 data = self.txqueue.get()
-                self.sock.sendall(data.encode())
+                self.sock.sendall(data.encode()+"|")
                 # except Exception as ex:
                 # template = "An exception of type {0} occurred. Arguments:\n{1!r}"
                 # message = template.format(type(ex).__name__, ex.args)
@@ -67,25 +67,24 @@ class ClientThread(threading.Thread):
         if (splitter[0] == "draft_player"):
             print(self.draft.current_roster.name, self.roster.name) 
             if ((self.draft.current_roster.name == self.roster.name)):
-                print("match") 
                 print(splitter[1], splitter[2]) 
                 if (splitter[1].startswith("p_name=") and splitter[2].startswith("p_rank=")):
                     p_name = splitter[1].split("=",1)[1]
                     p_rank = int(splitter[2].split("=",1)[1], 10)
                     player_idx = 0
                     for player in self.draft.players:
-                        print(player.name, p_name, player.rank, p_rank)
                         if player.name == p_name and player.rank == p_rank:
                             self.draft.acquire()
                             self.draft.draft_player(player_idx, 1)
                             self.draft.release()
-                            self.sendall("draftack".encode())
+                            self.sock.sendall("draftack|".encode())
                             #here
                             sync_up(self.draft)
+                            return
                         player_idx += 1
-                    self.sock.sendall("error".encode())
+                    self.sock.sendall("error|".encode())
             else:
-                self.sock.sendall("error".encode())
+                self.sock.sendall("error|".encode())
 
     def init_roster(self, splitter):
         found = 0
@@ -110,14 +109,14 @@ class ClientThread(threading.Thread):
                 break
 
         if found == 1:
-            self.sock.sendall("init,success".encode())
+            self.sock.sendall("init,success|".encode())
             if len(self.draft.selections):
                 sync_str = "sync"
                 for i in range(0, len(self.draft.selections)):
                     sync_str += ",{0}".format(self.draft.selections[i])
-                self.sock.sendall(sync_str.encode())
+                self.sock.sendall((sync_str+"|").encode())
         else:
-            self.sock.sendall("init,failure".encode())
+            self.sock.sendall("init,failure|".encode())
 
 class KeyboardThread(threading.Thread):
     def __init__(self, draft, rxqueue):

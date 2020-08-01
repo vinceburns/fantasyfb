@@ -41,19 +41,21 @@ class ServerThread(threading.Thread):
                 out_string = (strftime("[%H:%M:%S] ",localtime()) + str(data))
                 self.draft.acquire()
                 self.draft.logger.logg(out_string, 1)
-                splitter = data.decode().split(",")
-                if splitter[0] == "sync":
-                    selections = []
-                    for i in range(1, len(splitter)):
-                        selections.append(int(splitter[i]))
-                    self.draft.sync_draft(selections)
-                if splitter[0] == "error":
-                    self.sock.sendall("ack|".encode())
-                if splitter[0] == "draftack":
-                    self.sock.sendall("ack|".encode())
-                if splitter[0] == "init":
-                    if splitter[1] == "success":
-                        self.connected = 1
+                msgs = data.decode().split("|")
+                for msg in msgs:
+                    splitter = msg.split(",")
+                    if splitter[0] == "sync":
+                        selections = []
+                        for i in range(1, len(splitter)):
+                            selections.append(int(splitter[i]))
+                        self.draft.sync_draft(selections)
+                    if splitter[0] == "error":
+                        self.sock.sendall("ack|".encode())
+                    if splitter[0] == "draftack":
+                        self.sock.sendall("ack|".encode())
+                    if splitter[0] == "init":
+                        if splitter[1] == "success":
+                            self.connected = 1
                 self.draft.release()
             except socket.timeout:
                 pass
