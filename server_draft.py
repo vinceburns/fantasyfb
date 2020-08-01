@@ -65,23 +65,27 @@ class ClientThread(threading.Thread):
             # print("Recv process time:{0}".format(time.time()-self.ts))
     def handle_msg(self, splitter):
         if (splitter[0] == "draft_player"):
-            if ((self.draft.current_roster.name == self.roster) and splitter[1].startswith("p_name=") and splitter[2].startswith("p_rank=")):
-                p_name = splitter[1].split("=",1)[1]
-                p_rank = splitter[2].split("=",1)[1]
-                player_idx = 0
-                for player in self.draft.players:
-                    if player.name == p_name and player.rank == p_rank:
-                        self.draft.acquire()
-                        self.draft.draft_player(player_idx, 1)
-                        self.draft.release()
-                if player_idx == len(self.draft.players):
+            print(self.draft.current_roster.name, self.roster.name) 
+            if ((self.draft.current_roster.name == self.roster.name)):
+                print("match") 
+                print(splitter[1], splitter[2]) 
+                if (splitter[1].startswith("p_name=") and splitter[2].startswith("p_rank=")):
+                    p_name = splitter[1].split("=",1)[1]
+                    p_rank = int(splitter[2].split("=",1)[1], 10)
+                    player_idx = 0
+                    for player in self.draft.players:
+                        print(player.name, p_name, player.rank, p_rank)
+                        if player.name == p_name and player.rank == p_rank:
+                            self.draft.acquire()
+                            self.draft.draft_player(player_idx, 1)
+                            self.draft.release()
+                            self.sendall("draftack".encode())
+                            #here
+                            sync_up(self.draft)
+                        player_idx += 1
                     self.sock.sendall("error".encode())
-                else:
-                    self.sendall("draftack".encode())
-                    #here
-                    sync_up(self.draft)
             else:
-                self.sock.sendall("error")
+                self.sock.sendall("error".encode())
 
     def init_roster(self, splitter):
         found = 0
@@ -101,6 +105,7 @@ class ClientThread(threading.Thread):
             if roster.position == r_pos:
                 roster.name = r_name
                 self.name = r_name
+                self.roster = roster
                 found = 1
                 break
 

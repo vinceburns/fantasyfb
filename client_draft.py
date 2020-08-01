@@ -34,7 +34,7 @@ class ServerThread(threading.Thread):
     def run(self):
         while True:
             if self.connected == 0:
-                init_string = "init,name={0},pos={1}".format(self.draft.user_name, self.draft.user_pos)
+                init_string = "init,name={0},pos={1}".format(self.draft.user_name, (self.draft.user_pos + 1))
                 self.sock.sendall((init_string + "|").encode())
             try:
                 data, addr = self.sock.recvfrom(4096)
