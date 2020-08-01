@@ -18,10 +18,11 @@ Controls received events and decides to send acks.
 '''
 
 class ServerThread(threading.Thread):
-    def __init__(self, port, txqueue, draft, server_addr):
+    def __init__(self, port, keyqueue, txqueue, draft, server_addr):
         threading.Thread.__init__(self)
         self.name = 'ServerThread'
         self.txqueue = txqueue
+        self.keyqueue = txqueue
         self.draft = draft
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -49,10 +50,13 @@ class ServerThread(threading.Thread):
                         for i in range(1, len(splitter)):
                             selections.append(int(splitter[i]))
                         self.draft.sync_draft(selections)
+                        self.keyqueu.put("sync")
+
                     if splitter[0] == "error":
                         self.sock.sendall("ack|".encode())
                     if splitter[0] == "draftack":
                         self.sock.sendall("ack|".encode())
+                        self.keyqueu.put("draftack")
                     if splitter[0] == "init":
                         if splitter[1] == "success":
                             self.connected = 1
@@ -253,7 +257,7 @@ def main():
     keyboard_rxqueue = Queue()
     threadpool = []
 
-    server_thr = ServerThread(port, txqueue, draft, send_address)
+    server_thr = ServerThread(port, keyboard_rxqueue, txqueue, draft, send_address)
 
     threadpool.append(server_thr)
     key_thr = KeyboardThread(draft, txqueue, keyboard_rxqueue)

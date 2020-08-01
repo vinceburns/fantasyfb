@@ -57,7 +57,7 @@ class ClientThread(threading.Thread):
                 return
             while not self.txqueue.empty():
                 data = self.txqueue.get()
-                self.sock.sendall(data.encode()+"|")
+                self.sock.sendall((data+"|").encode())
                 # except Exception as ex:
                 # template = "An exception of type {0} occurred. Arguments:\n{1!r}"
                 # message = template.format(type(ex).__name__, ex.args)
