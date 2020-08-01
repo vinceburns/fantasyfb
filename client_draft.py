@@ -171,7 +171,7 @@ class KeyboardThread(threading.Thread):
                         draft.logger.logg("waiting sync", 1)
                         self.synced = 0
                 draft.logger.logg("turn complete", 1)
-                self.state = 0
+            self.state = 0
         else:
             self.state = 0
         return 
