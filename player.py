@@ -36,6 +36,7 @@ class Player():
             out_strin += "%03d | "%(self.adp)
         except:
             out_strin += "err |"
+        out_strin += "%03d  | "%(self.bye)
         return out_strin
 
 if __name__ == '__main__':
