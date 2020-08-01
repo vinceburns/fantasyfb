@@ -225,7 +225,7 @@ class Draft():
             #going down the snake. or should i say snek
             roster_idx = ((self.n_rosters-1) - self.rd_pick)
         self.current_roster = self.roster[roster_idx]
-        self.logger.logg("Round:{0}, Pick:{1}, Team:{2}, Total_Picks:{3}, Remaining_Picks:{4}(per team:{5})".format(self.round, self.rd_pick, self.current_roster.name, self.total_pick, self.remaining_picks, round(self.remaining_picks/self.n_rosters)), 1)
+        self.logger.logg("Round:{0}, Pick:{1}, Team:{2}, Total_Picks:{3}, Remaining_Picks:{4}(per team:{5})".format(self.round, self.rd_pick, self.current_roster.name, self.total_pick, self.remaining_picks, round(self.remaining_picks/self.n_rosters)), is_server)
         if (is_server == 1) and self.my_turn():
             self.logger.logg("Your are on the Clock!!!!", 1)
 
@@ -246,7 +246,7 @@ class Draft():
             return None,None
 
 
-    def sync_draft(self, selections):
+    def sync_draft(self, selections, logg_it):
         self.players = copy.copy(self.allplayers)
         self.round = 0
         self.rd_pick = 0
@@ -258,7 +258,9 @@ class Draft():
             for i in range(0, roster.max_players):
                 roster.sorted_playerlist[i] = "Empty"
         while (self.total_pick < (len(selections)) + 1):
-            self.logger.logg("round:{0} roster:{1} self.rd_pick:{2}".format(self.round, self.current_roster.name, self.rd_pick), 1)
+            is_last = 0
+            if (self.total_pick >= (len(selections)+1)):
+                is_last = 1
             player_idx = len(self.players)
             for i in range(0, len(self.players)):
                 if self.players[i].rank == selections[self.total_pick-1]:
@@ -268,9 +270,10 @@ class Draft():
                 self.logger.logg("invalid player selection", 1)
                 sys.exit(2)
 
-            self.draft_player(player_idx, 0)
+            self.draft_player(player_idx, is_last)
+            if is_last:
+                self.logger.logg("round:{0} roster:{1} self.rd_pick:{2}".format(self.round, self.current_roster.name, self.rd_pick), 1)
 
-        self.logger.logg("total_pick:{0} len:{1}".format(self.total_pick, len(selections)), 1)
         if self.my_turn():
             self.logger.logg("Your are on the Clock!!!!", 1)
         return True
