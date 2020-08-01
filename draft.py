@@ -198,7 +198,7 @@ class Draft():
         if (self.rd_pick == self.n_rosters):
             self.rd_pick = 0
             self.round += 1
-        self.current_roster.fill_in()
+        self.current_roster.fill_in(is_server)
         if (self.remaining_picks == 0):
             self.done = 1
 
@@ -208,7 +208,7 @@ class Draft():
             roster_idx = ((self.n_rosters-1) - self.rd_pick)
         self.current_roster = self.roster[roster_idx]
         self.logger.logg("Round:{0}, Pick:{1}, Team:{2}, Total_Picks:{3}, Remaining_Picks:{4}(per team:{5})".format(self.round, self.rd_pick, self.current_roster.name, self.total_pick, self.remaining_picks, round(self.remaining_picks/self.n_rosters)), 1)
-        if is_server and self.my_turn():
+        if (is_server == 1) and self.my_turn():
             self.logger.logg("Your are on the Clock!!!!", 1)
 
     def confirm_selection(self, selections, uIn):

@@ -30,7 +30,7 @@ class Roster():
         for i in range(0, self.max_players):
             self.sorted_playerlist.append(dummy)
         self.addr = None
-    def fill_in(self):
+    def fill_in(self, do_print):
         self.logger.logg("fill_in", 0)
         self.b_idx = defs.PLAYERSTATUS_BENCH
         dummy = "Empty"
@@ -115,7 +115,8 @@ class Roster():
             else:
                 self.logger.logg("unknown found at%d"%(i), 1)
             i += 1
-        self.print_roster()
+        if do_print == 1:
+            self.print_roster()
 
     def bench_player_add(self, player):
         try:
