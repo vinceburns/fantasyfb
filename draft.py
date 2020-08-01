@@ -46,7 +46,7 @@ class Draft():
             else:
                 ros_str = "comp%d"%(i)
             roster = Roster(i, ros_str, self.player_csv, self.logger)
-            if i == self.user_pos:
+            if i == (self.user_pos+1):
                 self.user_roster = roster
             self.roster.append(roster)
         if load != None:
