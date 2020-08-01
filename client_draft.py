@@ -22,7 +22,7 @@ class ServerThread(threading.Thread):
         threading.Thread.__init__(self)
         self.name = 'ServerThread'
         self.txqueue = txqueue
-        self.keyqueue = txqueue
+        self.keyqueue = keyqueue
         self.draft = draft
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -50,13 +50,14 @@ class ServerThread(threading.Thread):
                         for i in range(1, len(splitter)):
                             selections.append(int(splitter[i]))
                         self.draft.sync_draft(selections)
-                        self.keyqueu.put("sync")
+                        self.keyqueue.put("sync")
 
                     if splitter[0] == "error":
                         self.sock.sendall("ack|".encode())
                     if splitter[0] == "draftack":
+                        print("!ack")
                         self.sock.sendall("ack|".encode())
-                        self.keyqueu.put("draftack")
+                        self.keyqueue.put("draftack")
                     if splitter[0] == "init":
                         if splitter[1] == "success":
                             self.connected = 1
@@ -101,6 +102,7 @@ class KeyboardThread(threading.Thread):
     def wait_server(self):
         while not self.rxqueue.empty():
             data = self.rxqueue.get()
+            print("wait server{0}".format(data))
             if data == "sync":
                 self.synced = 1
             if data == "draftack":
@@ -109,7 +111,6 @@ class KeyboardThread(threading.Thread):
                 self.pick_outcome = "success"
             if data == "error":
                 self.pick_outcome = "failure"
-            self.rxqueue.task_done()
         return
     def parse_input(self, uIn):
         draft = self.draft
@@ -170,6 +171,7 @@ class KeyboardThread(threading.Thread):
                         draft.logger.logg("waiting sync", 1)
                         self.synced = 0
                 draft.logger.logg("turn complete", 1)
+                self.state = 0
         else:
             self.state = 0
         return 
