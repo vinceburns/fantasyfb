@@ -54,6 +54,7 @@ class ClientThread(threading.Thread):
                     else:
                         self.handle_msg(splitter)
             except socket.timeout:
+                print("THREAD DIED")
                 return
             while not self.txqueue.empty():
                 data = self.txqueue.get()
@@ -184,6 +185,9 @@ class KeyboardThread(threading.Thread):
                 except:
                     pass
                 roster.print_roster()
+            elif uIn.startswith("3"):
+                self.draft.revert_pick()
+                sync_up(self.draft)
             elif uIn.startswith("4"):
                 try:
                     file_name = uIn.split(':')[1]

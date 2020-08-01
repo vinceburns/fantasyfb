@@ -66,6 +66,24 @@ class Draft():
             return True
         return False
 
+    def revert_pick(self):
+        with open(self.picklogger, 'r') as f:
+            picks = f.readlines()
+        last_pick = picks[len(picks)-1].split("|")
+        if ((self.total_pick-1) != int(last_pick[0],10)):
+            str =  "Bad error on revert pick..."
+            self.logger.logg(str, 1)
+            sys.exit(2)
+        self.total_pick -= 1
+        rank = int(last_pick[2], 10)
+        roster_idx = int(last_pick[1], 10)
+        self.selections.pop()
+        for i in range(0, len(self.players)):
+            if rank < self.players[i].rank:
+                self.players.insert(i, self.allplayers[rank-1])
+                break
+        self.sync_draft(self.selections)
+
     def check_starred(self):
         if (len(self.starred_players) == 0):
             self.logger.logg("No stared players", 1)
