@@ -30,8 +30,6 @@ class Player():
         out_strin += " | %s | "%(self.position)
         out_strin += "%03d  | "%(self.rank)
         out_strin += "%s  | "%(self.team)
-        out_strin += "%03d  | "%(self.pick)
-        out_strin += "%03d    | "%(self.overallpick)
         try: 
             out_strin += "%03d | "%(self.adp)
         except:

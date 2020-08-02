@@ -55,8 +55,8 @@ class ClientThread(threading.Thread):
                     else:
                         self.handle_msg(splitter)
             except socket.timeout:
-                error += 1
-                if error = 20:
+                self.error += 1
+                if self.error == 20:
                     print("THREAD DIED")
 
                     return

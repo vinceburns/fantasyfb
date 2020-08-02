@@ -100,7 +100,6 @@ class KeyboardThread(threading.Thread):
     def wait_server(self):
         while not self.rxqueue.empty():
             data = self.rxqueue.get()
-            print("wait server{0}".format(data))
             if data == "sync":
                 self.synced = 1
             if data == "draftack":

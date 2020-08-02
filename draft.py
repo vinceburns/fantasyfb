@@ -180,7 +180,7 @@ class Draft():
         while (len(name_str) < self.maxnamelen):
             name_str += " "
         out_strin += name_str
-        out_strin += " | Pos | Rank | Team | Pick | Ovrall | ADP | Bye  |" 
+        out_strin += " | Pos | Rank | Team | ADP | Bye  |" 
         self.logger.logg(out_strin, 1)
         count = 0
         printer = ''
@@ -198,8 +198,8 @@ class Draft():
         self.logger.logg(printer, 1)
         return return_list
 
-    def draft_player(self, player_idx, is_server):
-        self.logger.logg("%s selected %s"%(self.current_roster.name, self.players[player_idx].name), 1)
+    def draft_player(self, player_idx, is_last):
+        self.logger.logg("%s selected %s"%(self.current_roster.name, self.players[player_idx].name), is_last)
         self.players[player_idx].pick = self.rd_pick + 1
         self.players[player_idx].overallpick = self.total_pick
         self.selections.append(self.players[player_idx].rank)
@@ -215,7 +215,7 @@ class Draft():
         if (self.rd_pick == self.n_rosters):
             self.rd_pick = 0
             self.round += 1
-        self.current_roster.fill_in(is_server)
+        self.current_roster.fill_in(is_last)
         if (self.remaining_picks == 0):
             self.done = 1
 
@@ -224,27 +224,28 @@ class Draft():
             #going down the snake. or should i say snek
             roster_idx = ((self.n_rosters-1) - self.rd_pick)
         self.current_roster = self.roster[roster_idx]
-        self.logger.logg("Round:{0}, Pick:{1}, Team:{2}, Total_Picks:{3}, Remaining_Picks:{4}(per team:{5})".format(self.round, self.rd_pick, self.current_roster.name, self.total_pick, self.remaining_picks, round(self.remaining_picks/self.n_rosters)), is_server)
-        if (is_server == 1) and self.my_turn():
-            self.logger.logg("Your are on the Clock!!!!", 1)
-        with open(self.picklogger, 'w') as f:
-            the_round = 0
-            rd_pick = 0
-            total_pick = 1
-            roster_idx = 0
-            for i in range(0, len(self.selections)):
-                #pick | @todo roster_idx | player rank
+        self.logger.logg("Round:{0}, Pick:{1}, Team:{2}, Total_Picks:{3}, Remaining_Picks:{4}(per team:{5})".format(self.round, self.rd_pick, self.current_roster.name, self.total_pick, self.remaining_picks, round(self.remaining_picks/self.n_rosters)), is_last)
+        if (is_last == 1):
+            if and self.my_turn():
+                self.logger.logg("Your are on the Clock!!!!", 1)
+            with open(self.picklogger, 'w') as f:
+                the_round = 0
+                rd_pick = 0
+                total_pick = 1
+                roster_idx = 0
+                for i in range(0, len(self.selections)):
+                    #pick | @todo roster_idx | player rank
 
-                f.write("%d|%d|%d\n"%((i +1), roster_idx, self.selections[i]))
-                total_pick += 1
-                rd_pick += 1
-                if (rd_pick == self.n_rosters):
-                    rd_pick = 0
-                    the_round += 1
-                roster_idx += 1
-                if the_round % 2 != 0:
-                    #going down the snake. or should i say snek
-                    roster_idx = ((self.n_rosters-1) - rd_pick)
+                    f.write("%d|%d|%d\n"%((i +1), roster_idx, self.selections[i]))
+                    total_pick += 1
+                    rd_pick += 1
+                    if (rd_pick == self.n_rosters):
+                        rd_pick = 0
+                        the_round += 1
+                    roster_idx += 1
+                    if the_round % 2 != 0:
+                        #going down the snake. or should i say snek
+                        roster_idx = ((self.n_rosters-1) - rd_pick)
 
     def confirm_selection(self, selections, uIn):
         if selections == None:

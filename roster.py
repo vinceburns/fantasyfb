@@ -141,7 +141,7 @@ class Roster():
         while (len(name_str) < max_name_len):
             name_str += " "
         out_strin += name_str
-        out_strin += " | Pos | Rank | Team | Pick | Ovrall | ADP |" 
+        out_strin += " | Pos | Rank | Team | ADP | Bye |" 
         output = out_strin + '\n'
 
         i = 0
