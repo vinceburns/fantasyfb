@@ -226,7 +226,7 @@ class Draft():
         self.current_roster = self.roster[roster_idx]
         self.logger.logg("Round:{0}, Pick:{1}, Team:{2}, Total_Picks:{3}, Remaining_Picks:{4}(per team:{5})".format(self.round, self.rd_pick, self.current_roster.name, self.total_pick, self.remaining_picks, round(self.remaining_picks/self.n_rosters)), is_last)
         if (is_last == 1):
-            if and self.my_turn():
+            if self.my_turn():
                 self.logger.logg("Your are on the Clock!!!!", 1)
             with open(self.picklogger, 'w') as f:
                 the_round = 0
