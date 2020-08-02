@@ -35,6 +35,7 @@ class ClientThread(threading.Thread):
         self.addr = addr
         self.initialized = 0
         self.roster = None
+        self.error = 0
 
         self.ts = None
 
@@ -54,8 +55,11 @@ class ClientThread(threading.Thread):
                     else:
                         self.handle_msg(splitter)
             except socket.timeout:
-                print("THREAD DIED")
-                return
+                error += 1
+                if error = 20:
+                    print("THREAD DIED")
+
+                    return
             except Exception as ex:
                 template = "An exception of type {0} occurred. Arguments:\n{1!r}"
                 message = template.format(type(ex).__name__, ex.args)
