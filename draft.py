@@ -288,9 +288,7 @@ class Draft():
                 sys.exit(2)
 
             self.draft_player(player_idx, is_last)
-            if is_last:
-                self.logger.logg("round:{0} roster:{1} self.rd_pick:{2}".format(self.round, self.current_roster.name, self.rd_pick), 1)
-
+        self.logger.logg("round:{0} roster:{1} self.rd_pick:{2}".format(self.round, self.current_roster.name, self.rd_pick), 1)
         if self.my_turn():
             self.logger.logg("Your are on the Clock!!!!", 1)
         return True

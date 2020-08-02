@@ -49,7 +49,7 @@ class ServerThread(threading.Thread):
                         selections = []
                         for i in range(1, len(splitter)):
                             selections.append(int(splitter[i]))
-                        self.draft.sync_draft(selections)
+                        self.draft.sync_draft(selections, 0)
                         self.keyqueue.put("sync")
 
                     if splitter[0] == "error":
