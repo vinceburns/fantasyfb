@@ -189,11 +189,9 @@ class KeyboardThread(threading.Thread):
                 self.draft.revert_pick()
                 sync_up(self.draft)
             elif uIn.startswith("4"):
-                try:
-                    file_name = uIn.split(':')[1]
-                    draft.resume_draft(file_name)
-                except:
-                    draft.logger.logg("Invalid file name", 1)
+                file_name = uIn.split(':')[1]
+                draft.resume_draft(file_name)
+                sync_up(self.draft)
             elif uIn.startswith("5"):
                 draft.check_starred()
             elif uIn.startswith("6"):
