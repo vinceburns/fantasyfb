@@ -56,13 +56,13 @@ class ClientThread(threading.Thread):
             except socket.timeout:
                 print("THREAD DIED")
                 return
+            except Exception as ex:
+                template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+                message = template.format(type(ex).__name__, ex.args)
+                print(message)
             while not self.txqueue.empty():
                 data = self.txqueue.get()
                 self.sock.sendall((data+"|").encode())
-                # except Exception as ex:
-                # template = "An exception of type {0} occurred. Arguments:\n{1!r}"
-                # message = template.format(type(ex).__name__, ex.args)
-                # print(message)
             # print("Recv process time:{0}".format(time.time()-self.ts))
     def handle_msg(self, splitter):
         if (splitter[0] == "draft_player"):

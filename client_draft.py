@@ -97,8 +97,6 @@ class KeyboardThread(threading.Thread):
                     self.parse_input(uIn)
             except EOFError:
                 _exit(1)
-            except TimeoutExpired:
-                pass
     def wait_server(self):
         while not self.rxqueue.empty():
             data = self.rxqueue.get()
