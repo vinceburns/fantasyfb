@@ -54,6 +54,7 @@ class ClientThread(threading.Thread):
                         self.init_roster(splitter)
                     else:
                         self.handle_msg(splitter)
+                        self.error = 0
             except socket.timeout:
                 self.error += 1
                 if self.error == 20:
@@ -64,6 +65,7 @@ class ClientThread(threading.Thread):
                 template = "An exception of type {0} occurred. Arguments:\n{1!r}"
                 message = template.format(type(ex).__name__, ex.args)
                 print(message)
+                return
             while not self.txqueue.empty():
                 data = self.txqueue.get()
                 self.sock.sendall((data+"|").encode())
@@ -83,8 +85,7 @@ class ClientThread(threading.Thread):
                             self.draft.draft_player(player_idx, 1)
                             self.draft.release()
                             self.sock.sendall("draftack|".encode())
-                            #here
-                            sync_up(self.draft)
+                            draft_player(self.draft)
                             return
                         player_idx += 1
                     self.sock.sendall("error|".encode())
@@ -133,20 +134,16 @@ class KeyboardThread(threading.Thread):
         self.synced = 0
         self.selected = 0
         self.pick_outcome = 0
-        self.ts = time.time()
         self.selections = []
 
     def run(self):
         while True:
-            uIn = input()
-            # print("In between execute:{0}".format(time.time()-self.ts))
             try:
+                uIn = input()
                 self.ts = time.time()
                 self.parse_input(uIn)
             except EOFError:
                 _exit(1)
-            # print("Keyboard process time:{0}".format(time.time()-self.ts))
-            self.ts = time.time()
     def parse_input(self, uIn):
         draft = self.draft
         print("self.state:{0}len:{1}".format(self.state, len(uIn)))
@@ -155,13 +152,17 @@ class KeyboardThread(threading.Thread):
             return
         if self.state == 0:
             if uIn == "h":
-                draft.logger.logg("help menu\nInput | Function|", 1)
-                draft.logger.logg("1  | Print Best available", 1)
-                draft.logger.logg("2  | Print Current Roster", 1)
-                draft.logger.logg("3  | Revert Pick todo", 1)
-                draft.logger.logg("4  | resume draft", 1)
-                draft.logger.logg("5  | starred players check", 1)
-                draft.logger.logg("6  | roster_addrs", 1)
+                draft.logger.logg("help menu\nInput       | Function", 1)
+                draft.logger.logg("1           | Print Best available", 1)
+                draft.logger.logg("2           | Print Current Roster", 1)
+                draft.logger.logg("3           | Revert Pick todo", 1)
+                draft.logger.logg("4           | resume draft", 1)
+                draft.logger.logg("5           | starred players check", 1)
+                draft.logger.logg("6           | roster_addrs", 1)
+                draft.logger.logg("7           | force sync", 1)
+                draft.logger.logg("8           | Print draft info", 1)
+                draft.logger.logg("!de:connid  | enable debugging", 1)
+                draft.logger.logg("!dd:connid  | disabling debugging", 1)
                 draft.logger.logg("start fuzzy finding any name to search for a player you would like. See creator for what fuzzy finding means:) (he stole the idea from a vim plugin he uses)", 1)
                 return
             elif uIn.startswith("1"):
@@ -201,6 +202,10 @@ class KeyboardThread(threading.Thread):
             elif uIn.startswith("6"):
                 for roster in draft.roster:
                     print(roster.name, roster.addr)
+            elif uIn.startswith("7"):
+                sync_up(self.draft)
+            elif uIn.startswith("8"):
+                draft.print_info()
             elif uIn.startswith("!de:"):
                 try:
                     idx = int(uIn.split(":", 1)[1], 10)
@@ -230,7 +235,7 @@ class KeyboardThread(threading.Thread):
                 self.draft.acquire()
                 self.draft.draft_player(player_idx, 1)
                 self.draft.release()
-                sync_up(self.draft)
+                draft_player(self.draft)
             self.state = 0
         else:
             self.state = 0
@@ -246,6 +251,16 @@ def sync_up(draft):
             print("addr{0}".format(t.addr))
             if (t.is_alive()):
                 print("{0}".format(sync_str))
+                t.txqueue.put_nowait(sync_str)
+            else:
+                print (t.is_alive())
+
+def draft_player(draft):
+    if len(draft.selections):
+        sync_str = "draft_player"
+        sync_str += ",{0}".format(draft.selections[len(draft.selections)-1])
+        for t in conn_threads:
+            if (t.is_alive()):
                 t.txqueue.put_nowait(sync_str)
             else:
                 print (t.is_alive())

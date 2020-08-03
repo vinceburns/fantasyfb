@@ -51,6 +51,11 @@ class ServerThread(threading.Thread):
                             selections.append(int(splitter[i]))
                         self.draft.sync_draft(selections, 0)
                         self.keyqueue.put("sync")
+                    if splitter[0] == "draft_player":
+                        player_rank = int(splitter[1], 10)
+                        player_idx = self.draft.playeridx_fromrank(player_rank)
+                        self.draft.draft_player(player_idx, 1)
+                        self.keyqueue.put("sync")
 
                     if splitter[0] == "error":
                         self.sock.sendall("ack|".encode())
@@ -121,6 +126,7 @@ class KeyboardThread(threading.Thread):
                 draft.logger.logg("1  | Print Best available", 1)
                 draft.logger.logg("2  | Print Current Roster", 1)
                 draft.logger.logg("5  | starred players check", 1)
+                draft.logger.logg("8  | Print Current pick info", 1)
                 draft.logger.logg("start fuzzy finding any name to search for a player you would like. See creator for what fuzzy finding means:) (he stole the idea from a vim plugin he uses)", 1)
                 return
             elif uIn.startswith("1"):
@@ -145,6 +151,8 @@ class KeyboardThread(threading.Thread):
                 roster.print_roster()
             elif uIn.startswith("5"):
                 draft.check_starred()
+            elif uIn.startswith("8"):
+                draft.print_info()
             else:
                 self.selections = draft.player_fzf(uIn)
                 if (len(self.selections) == 0):
@@ -251,6 +259,8 @@ def main():
             if player != None:
                 players.append(player)
 
+    position = 5
+    name = "vinnyb"
     draft = Draft(position, name, players, n_rosters, player_csv)
     txqueue = Queue()
     keyboard_rxqueue = Queue()
