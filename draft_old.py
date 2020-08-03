@@ -371,7 +371,7 @@ def is_fzfmatch(match_str, check_str):
         found = 0
         for check_char in range(0, len(check_str)):
             if match_str[match_char] == check_str[check_char]:
-                #we found this char trucate string and move to next match char
+                #we found this char truncate string and move to next match char
                 found = 1
                 if check_char != len(check_str):
                     check_str = check_str[check_char::]

@@ -260,7 +260,7 @@ class Draft():
                 self.logger.logg("confirm_select fail. player_idx:{0}, len:{1}".format(player_idx, len(selections)), 1)
                 return None,None
         except:
-            self.logger.logg("An exception occured. please try again with the forma y:<index>", 1)
+            self.logger.logg("An exception occurred. Please try again with the format y:<index>", 1)
             return None,None
 
 
