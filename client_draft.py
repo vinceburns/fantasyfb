@@ -259,8 +259,6 @@ def main():
             if player != None:
                 players.append(player)
 
-    position = 5
-    name = "vinnyb"
     draft = Draft(position, name, players, n_rosters, player_csv)
     txqueue = Queue()
     keyboard_rxqueue = Queue()
