@@ -41,7 +41,7 @@ class ServerThread(threading.Thread):
                 data, addr = self.sock.recvfrom(4096)
                 out_string = (strftime("[%H:%M:%S] ",localtime()) + str(data))
                 self.draft.acquire()
-                self.draft.logger.logg(out_string, 1)
+                self.draft.logger.logg(out_string, 0)
                 msgs = data.decode().split("|")
                 for msg in msgs:
                     splitter = msg.split(",")
@@ -65,7 +65,6 @@ class ServerThread(threading.Thread):
                     if splitter[0] == "error":
                         self.sock.sendall("ack|".encode())
                     if splitter[0] == "draftack":
-                        print("!ack")
                         self.sock.sendall("ack|".encode())
                         self.keyqueue.put("draftack")
                     if splitter[0] == "init":
@@ -80,7 +79,7 @@ class ServerThread(threading.Thread):
                 print(message)
             while not self.txqueue.empty():
                 data = self.txqueue.get()
-                self.draft.logger.logg("Sending Thread! {0}".format(data), 1)
+                self.draft.logger.logg("Sending Thread! {0}".format(data), 0)
                 self.sock.sendall((data+"|").encode())
             self.sock.sendall("ping|".encode())
 
@@ -114,26 +113,25 @@ class KeyboardThread(threading.Thread):
                 self.synced = 1
             if data == "draftack":
                 #improve this. 
-                self.draft.logger.logg("Congrats you drafted the player you wanted.", 1)
                 self.pick_outcome = "success"
             if data == "error":
                 self.pick_outcome = "failure"
         return
     def parse_input(self, uIn):
         draft = self.draft
-        print("self.state:{0}len:{1}".format(self.state, len(uIn)))
         if len(uIn) == 0:
             self.state = 0
             return
         if self.state == 0:
             if uIn == "h":
-                draft.logger.logg("help menu\nInput | Function|", 1)
-                draft.logger.logg("1  | Show Best available. Add a ':'<Pos> to limit it to particular position. Example: '1:qb' Positions: qb, rb, wr, te, dst, k", 1)
-                draft.logger.logg("", 1)
-                draft.logger.logg("2  | Show Current Roster. Add a ':'<Pos> to limit it to particular position. Example: '2:1' will show 1st players roster. No supplied positions will print your roster.", 1)
-                draft.logger.logg("5  | Check my starred players", 1)
-                draft.logger.logg("8  | Show Current pick info.", 1)
-                draft.logger.logg("start fuzzy finding any name to search for a player you would like. See creator for what fuzzy finding means:) (he stole the idea from a vim plugin he uses)", 1)
+                draft.logger.logg("Input         | Function ", 1)
+                draft.logger.logg('1             | Show best available (any position).', 1)
+                draft.logger.logg('1:<pos>       | Show best available for supplied position. Example: "1:qb". Valid Positions: qb, rb, wr, te, dst, k.', 1)
+                draft.logger.logg("2             | Show your current roster. ", 1)
+                draft.logger.logg("2:<draft_pos> | Show roster for the person at supplied draft position.", 1)
+                draft.logger.logg("5             | Check my starred players.", 1)
+                draft.logger.logg("8             | Show draft information (who is on the clock, when your next turn is, etc.).", 1)
+                draft.logger.logg("<fuzzyfind>   | Fuzzy find a players name. Ask the creator for definition of fuzzy find if you want to use this feature.", 1)
                 return
             elif uIn.startswith("1"):
                 try:
@@ -158,8 +156,12 @@ class KeyboardThread(threading.Thread):
             elif uIn.startswith("5"):
                 draft.check_starred()
             elif uIn.startswith("8"):
-                draft.print_info()
+                draft.print_info(1)
             else:
+                if uIn.startswith("y:"):
+                    draft.logger.logg("Sorry it is not your turn", 1)
+                    return
+
                 self.selections = draft.player_fzf(uIn)
                 if (len(self.selections) == 0):
                     return
@@ -171,17 +173,13 @@ class KeyboardThread(threading.Thread):
             if (name != None) and (player_idx != None):
                 self.synced = 0
                 self.pick_outcome = 0
+                #flush out any sync queues
+                while not self.rxqueue.empty():
+                    data = self.rxqueue.get()
                 self.send_server("draft_player,p_name={0},p_rank={1}".format(name, self.draft.players[player_idx].rank))
                 while ((self.synced == 0) and (self.pick_outcome == 0)):
                     self.wait_server()
-                    if self.pick_outcome == "success":
-                        draft.logger.logg("Congrats you draft the player you wanted", 1)
-                        draft.logger.logg("waiting sync", 1)
-                    if self.pick_outcome == "failure":
-                        draft.logger.logg("Error :( Vince can't write code", 1)
-                        draft.logger.logg("waiting sync", 1)
-                        self.synced = 0
-                draft.logger.logg("turn complete", 1)
+                draft.logger.logg("turn complete", 0)
             self.state = 0
         else:
             self.state = 0

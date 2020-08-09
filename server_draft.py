@@ -150,7 +150,6 @@ class KeyboardThread(threading.Thread):
                 _exit(1)
     def parse_input(self, uIn):
         draft = self.draft
-        print("self.state:{0}len:{1}".format(self.state, len(uIn)))
         if len(uIn) == 0:
             self.state = 0
             return
@@ -209,7 +208,7 @@ class KeyboardThread(threading.Thread):
             elif uIn.startswith("7"):
                 sync_up(self.draft)
             elif uIn.startswith("8"):
-                draft.print_info()
+                draft.print_info(1)
             elif uIn.startswith("!de:"):
                 try:
                     idx = int(uIn.split(":", 1)[1], 10)
@@ -246,18 +245,15 @@ class KeyboardThread(threading.Thread):
         return 
 
 def sync_up(draft):
-    print("sync_up{0}".format(len(draft.selections)))
     if len(draft.selections):
         sync_str = "sync"
         for i in range(0, len(draft.selections)):
             sync_str += ",{0}".format(draft.selections[i])
         for t in conn_threads:
-            print("addr{0}".format(t.addr))
             if (t.is_alive()):
-                print("{0}".format(sync_str))
                 t.txqueue.put_nowait(sync_str)
             else:
-                print (t.is_alive())
+                pass
 
 def draft_player(draft):
     if len(draft.selections):
@@ -267,7 +263,7 @@ def draft_player(draft):
             if (t.is_alive()):
                 t.txqueue.put_nowait(sync_str)
             else:
-                print (t.is_alive())
+                pass
 
 
 def player_generate_fromcsv(line):

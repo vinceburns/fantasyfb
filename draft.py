@@ -69,6 +69,7 @@ class Draft():
     def revert_pick(self):
         with open(self.picklogger, 'r') as f:
             picks = f.readlines()
+        print(picks)
         last_pick = picks[len(picks)-1].split("|")
         if ((self.total_pick-1) != int(last_pick[0],10)):
             print(self.total_pick-1)
@@ -180,7 +181,7 @@ class Draft():
         while (len(name_str) < self.maxnamelen):
             name_str += " "
         out_strin += name_str
-        out_strin += " | Pos | Rank | Team | ADP | Bye   |" 
+        out_strin += " | Pos | Rank | Team | ADP | Bye |" 
         self.logger.logg(out_strin, 1)
         count = 0
         printer = ''
@@ -199,7 +200,10 @@ class Draft():
         return return_list
 
     def draft_player(self, player_idx, is_last):
-        self.logger.logg("!!!!!!!!!!!!!!!!!!!!!!\r\n\r\n%s selected %s\r\n\r\n!!!!!!!!!!!!!!!!!!!!!!"%(self.current_roster.name, self.players[player_idx].name), is_last)
+        r_name = self.current_roster.name
+        if self.my_turn():
+            r_name = "You"
+        self.logger.logg("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\r\n\r\n%s selected %s\r\n\r\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"%(r_name, self.players[player_idx].name), is_last)
         self.players[player_idx].pick = self.rd_pick + 1
         self.players[player_idx].overallpick = self.total_pick
         self.selections.append(self.players[player_idx].rank)
@@ -224,12 +228,12 @@ class Draft():
             #going down the snake. or should i say snek
             roster_idx = ((self.n_rosters-1) - self.rd_pick)
         self.current_roster = self.roster[roster_idx]
-        self.logger.logg("Round:{0}, Pick:{1}, Team:{2}, Total_Picks:{3}, Remaining_Picks:{4}(per team:{5})".format(self.round, self.rd_pick, self.current_roster.name, self.total_pick, self.remaining_picks, round(self.remaining_picks/self.n_rosters)), is_last)
+        self.logger.logg("Round:{0}, Pick:{1}, Team:{2}, Total_Picks:{3}, Remaining_Picks:{4}(per team:{5})".format((self.round + 1), (self.rd_pick + 1), self.current_roster.name, (self.total_pick - 1), self.remaining_picks, round(self.remaining_picks/self.n_rosters)), is_last)
         if (is_last == 1):
             if self.my_turn():
                 self.logger.logg("You are on the Clock!!!!", 1)
             else:
-                self.print_info()
+                self.print_info(0)
             with open(self.picklogger, 'w') as f:
                 the_round = 0
                 rd_pick = 0
@@ -287,7 +291,8 @@ class Draft():
                 roster.sorted_playerlist[i] = "Empty"
         while (self.total_pick < (len(selections)) + 1):
             is_last = 0
-            if (self.total_pick >= (len(selections)+1)):
+            if (self.total_pick >= (len(selections))):
+                print("is last!")
                 is_last = 1
             player_idx = len(self.players)
             for i in range(0, len(self.players)):
@@ -299,13 +304,14 @@ class Draft():
                 sys.exit(2)
 
             self.draft_player(player_idx, is_last)
-        self.logger.logg("round:{0} round pick:{2} roster:{1} total picks:{3}".format(self.round, self.current_roster.name, self.rd_pick, (self.total_pick - 1)), 1)
+        self.logger.logg("Round:{0} Round pick:{2} roster:{1} total picks:{3}".format((self.round + 1), self.current_roster.name, (self.rd_pick + 1), (self.total_pick - 1)), 1)
         if self.my_turn():
-            self.logger.logg("Your are on the Clock!!!!", 1)
+            self.logger.logg("You are on the Clock!!!!", 1)
         return True
 
-    def print_info(self):
-        self.logger.logg("round:{0} round pick:{2} roster:{1} total picks:{3}".format(self.round, self.current_roster.name, self.rd_pick, (self.total_pick - 1)), 1)
+    def print_info(self, header):
+        if header == 1:
+            self.logger.logg("{1} is on the clock!\r\nround:{0} round pick:{2} total picks:{3}".format((self.round + 1), self.current_roster.name, (self.rd_pick + 1), self.total_pick), 1)
         next_pick = self.total_pick
         remaining_picks = self.remaining_picks
 
@@ -333,7 +339,9 @@ class Draft():
         elif (len(user_picks) == 1):
             self.logger.logg("Your last pick is {0} picks".format((user_picks[0] - self.total_pick)), 1)
         else:
-            self.logger.logg("You're up in {0} picks ({1} more until your following turn)".format((user_picks[0] - self.total_pick), (user_picks[1] - (self.total_pick + user_picks[0]))), 1)
+            first = user_picks[0] - self.total_pick
+            second = (user_picks[1] - self.total_pick) - (first + 1)
+            self.logger.logg("You're up in {0} picks ({1} more after that until your following turn)".format(first, second), 1)
 
     def player_fzf(self, string):
         test_list = []
@@ -353,7 +361,7 @@ class Draft():
         while (len(name_str) < self.maxnamelen):
             name_str += " "
         out_strin += name_str
-        out_strin += " | Pos | Rank | Team | ADP | Bye   |" 
+        out_strin += " | Pos | Rank | Team | ADP | Bye |" 
         self.logger.logg(out_strin, 1)
         count = 0
         printer = ''
