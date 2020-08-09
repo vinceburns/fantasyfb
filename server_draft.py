@@ -121,10 +121,10 @@ class ClientThread(threading.Thread):
                 for i in range(0, len(self.draft.selections)):
                     sync_str += ",{0}".format(self.draft.selections[i])
                 self.sock.sendall((sync_str+"|").encode())
-                send_str = "roster_names"
-                for i in range(0, len(self.draft.n_rosters)):
-                    send_str += ",{0}".format(self.draft.roster[i].name)
-                self.sock.sendall((send_str+"|").encode())
+            send_str = "roster_names"
+            for i in range(0, self.draft.n_rosters):
+                send_str += ",{0}".format(self.draft.roster[i].name)
+            self.sock.sendall((send_str+"|").encode())
         else:
             self.sock.sendall("init,failure|".encode())
 
