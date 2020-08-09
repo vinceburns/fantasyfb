@@ -180,7 +180,7 @@ class Draft():
         while (len(name_str) < self.maxnamelen):
             name_str += " "
         out_strin += name_str
-        out_strin += " | Pos | Rank | Team | ADP | Bye  |" 
+        out_strin += " | Pos | Rank | Team | ADP | Bye   |" 
         self.logger.logg(out_strin, 1)
         count = 0
         printer = ''
@@ -199,7 +199,7 @@ class Draft():
         return return_list
 
     def draft_player(self, player_idx, is_last):
-        self.logger.logg("%s selected %s"%(self.current_roster.name, self.players[player_idx].name), is_last)
+        self.logger.logg("!!!!!!!!!!!!!!!!!!!!!!\r\n\r\n%s selected %s\r\n\r\n!!!!!!!!!!!!!!!!!!!!!!"%(self.current_roster.name, self.players[player_idx].name), is_last)
         self.players[player_idx].pick = self.rd_pick + 1
         self.players[player_idx].overallpick = self.total_pick
         self.selections.append(self.players[player_idx].rank)
@@ -227,7 +227,9 @@ class Draft():
         self.logger.logg("Round:{0}, Pick:{1}, Team:{2}, Total_Picks:{3}, Remaining_Picks:{4}(per team:{5})".format(self.round, self.rd_pick, self.current_roster.name, self.total_pick, self.remaining_picks, round(self.remaining_picks/self.n_rosters)), is_last)
         if (is_last == 1):
             if self.my_turn():
-                self.logger.logg("Your are on the Clock!!!!", 1)
+                self.logger.logg("You are on the Clock!!!!", 1)
+            else:
+                self.print_info()
             with open(self.picklogger, 'w') as f:
                 the_round = 0
                 rd_pick = 0
@@ -310,16 +312,10 @@ class Draft():
         rd_pick = self.rd_pick
         rd = self.round
 
-        roster_idx = rd_pick
         user_picks = []
         while True:
             if remaining_picks == 0:
                 break
-            if self.user_pos == roster_idx:
-                user_picks.append(next_pick)
-            next_pick += 1
-            remaining_picks -= 1
-            rd_pick += 1
             if (rd_pick == self.n_rosters):
                 rd_pick = 0
                 rd += 1
@@ -327,12 +323,17 @@ class Draft():
             if rd % 2 != 0:
                 #going down the snake. or should i say snek
                 roster_idx = ((self.n_rosters-1) - rd_pick)
+            if self.user_pos == roster_idx:
+                user_picks.append(next_pick)
+            next_pick += 1
+            remaining_picks -= 1
+            rd_pick += 1
         if (len(user_picks) == 0):
             self.logger.logg("You have no picks remaining", 1)
         elif (len(user_picks) == 1):
             self.logger.logg("Your last pick is {0} picks".format((user_picks[0] - self.total_pick)), 1)
         else:
-            self.logger.logg("There is {0} more picks until your next pick and {1} more picks until the one after that. ".format((user_picks[0] - self.total_pick), (user_picks[1] - self.total_pick)), 1)
+            self.logger.logg("You're up in {0} picks ({1} more until your following turn)".format((user_picks[0] - self.total_pick), (user_picks[1] - (self.total_pick + user_picks[0]))), 1)
 
     def player_fzf(self, string):
         test_list = []
@@ -352,7 +353,7 @@ class Draft():
         while (len(name_str) < self.maxnamelen):
             name_str += " "
         out_strin += name_str
-        out_strin += " | Pos | Rank | Team | ADP | Bye  |" 
+        out_strin += " | Pos | Rank | Team | ADP | Bye   |" 
         self.logger.logg(out_strin, 1)
         count = 0
         printer = ''
