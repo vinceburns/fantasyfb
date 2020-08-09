@@ -13,7 +13,7 @@ import time
 #@note (vburns) this will only work on a windows machine currently due to the winsound requirement
 
 send_address = ("192.168.0.106", 7096)
-confirm_selection_str = "It's your turn. Would you like to select one of those players? if so please send y<selection> for example if you want #10 from that list please send 'y10'\n"
+confirm_selection_str = "It's your turn. Would you like to select one of those players? if so please send y<selection> for example if you want #10 from that list please send 'y:10'\n"
 
 '''
 Controls received events and decides to send acks.
@@ -121,6 +121,10 @@ class ClientThread(threading.Thread):
                 for i in range(0, len(self.draft.selections)):
                     sync_str += ",{0}".format(self.draft.selections[i])
                 self.sock.sendall((sync_str+"|").encode())
+                send_str = "roster_names"
+                for i in range(0, len(self.draft.n_rosters)):
+                    send_str += ",{0}".format(self.draft.roster[i].name)
+                self.sock.sendall((send_str+"|").encode())
         else:
             self.sock.sendall("init,failure|".encode())
 
@@ -289,7 +293,7 @@ def player_generate_fromcsv(line):
     try:
         bye = int(lis[6], 10)
     except:
-        bye = None
+        bye = 0
     try:
         lis[11] = lis[11].split('.')[0]
     except IndexError:
@@ -314,9 +318,12 @@ def main():
     players = []
     player_csv = "FantasyPros_2020_Draft_Overall_Rankings.csv"
     position = 6
-    name = "vinny"
+    user_name = "vinny"
     n_rosters = 8
-    with open("user_cfg.cfg",'r') as f:
+    names = []
+    for i in range(0, 14):
+        names.append("comp{0}".format(i))
+    with open("server_cfg.cfg",'r') as f:
         for line in f:
             if line.startswith("CSVFILE"):
                 player_csv = line.split("=", 1)[1].strip()
@@ -326,8 +333,13 @@ def main():
                 position = int(line.split("=", 1)[1], 10)
             elif line.startswith("N_TEAMS"):
                 n_rosters = int(line.split("=", 1)[1], 10)
+            elif line.startswith("USER_NAME"):
+                user_name = line.split("=", 1)[1].strip()
             elif line.startswith("TEAM_NAME"):
-                name = line.split("=", 1)[1].strip()
+                stuff = line.split("=", 1)[1].strip()
+                roster_position = int(stuff.split(",", 1)[0], 10)
+                name = stuff.split(",", 1)[1]
+                names[roster_position] = name
             elif line.startswith("SERVER_ADDRESS"):
                 ip = line.split("=", 1)[1].split(",", 1)[0].strip()
                 send_port = int(line.split("=", 1)[1].split(",", 1)[1], 10)
@@ -340,7 +352,10 @@ def main():
             if player != None:
                 players.append(player)
 
-    draft = Draft(position, name, players, n_rosters, player_csv)
+    draft = Draft(position, user_name, players, n_rosters, player_csv)
+    for i in range(0, draft.n_rosters):
+        if i != draft.user_pos:
+            draft.roster[i].name = names[i]
 
     keyboard_rxqueue = Queue()
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
