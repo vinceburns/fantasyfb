@@ -11,7 +11,7 @@ from player import Player
 import time
 
 send_address = ("192.168.0.106", 7096)
-confirm_selection_str = "It's your turn. Would you like to select one of those players? if so please send y<selection> for example if you want #10 from that list please send 'y10'\n"
+confirm_selection_str = "It's your turn. Would you like to select one of those players? if so please send y<selection> for example if you want #10 from that list please send 'y:10'\n"
 
 '''
 Controls received events and decides to send acks.
@@ -51,6 +51,11 @@ class ServerThread(threading.Thread):
                             selections.append(int(splitter[i]))
                         self.draft.sync_draft(selections, 0)
                         self.keyqueue.put("sync")
+                    if splitter[0] == "roster_names":
+                        names = []
+                        for i in range(1, len(splitter)):
+                            if ((i - 1) < self.draft.n_rosters):
+                                self.draft.roster[i-1].name = splitter[i]
                     if splitter[0] == "draft_player":
                         player_rank = int(splitter[1], 10)
                         player_idx = self.draft.playeridx_fromrank(player_rank)
@@ -123,10 +128,11 @@ class KeyboardThread(threading.Thread):
         if self.state == 0:
             if uIn == "h":
                 draft.logger.logg("help menu\nInput | Function|", 1)
-                draft.logger.logg("1  | Print Best available", 1)
-                draft.logger.logg("2  | Print Current Roster", 1)
-                draft.logger.logg("5  | starred players check", 1)
-                draft.logger.logg("8  | Print Current pick info", 1)
+                draft.logger.logg("1  | Show Best available. Add a ':'<Pos> to limit it to particular position. Example: '1:qb' Positions: qb, rb, wr, te, dst, k", 1)
+                draft.logger.logg("", 1)
+                draft.logger.logg("2  | Show Current Roster. Add a ':'<Pos> to limit it to particular position. Example: '2:1' will show 1st players roster. No supplied positions will print your roster.", 1)
+                draft.logger.logg("5  | Check my starred players", 1)
+                draft.logger.logg("8  | Show Current pick info.", 1)
                 draft.logger.logg("start fuzzy finding any name to search for a player you would like. See creator for what fuzzy finding means:) (he stole the idea from a vim plugin he uses)", 1)
                 return
             elif uIn.startswith("1"):
@@ -208,7 +214,7 @@ def player_generate_fromcsv(line):
     try:
         bye = int(lis[6], 10)
     except:
-        bye = None
+        bye = 0
     try:
         adp = lis[11].split('.')[0]
     except IndexError:
