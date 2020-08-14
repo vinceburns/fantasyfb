@@ -259,9 +259,10 @@ class Draft():
         if not uIn.startswith("y"):
             return None,None
         try:
-            player_idx =  int(uIn.split(":", 10)[1])
-            if ((player_idx <= len(selections)) and (player_idx > 0)):
-                return self.players[player_idx-1].name, selections[player_idx-1]
+            selection_idx = (int(uIn.split(":", 10)[1]) - 1)
+            if ((selection_idx < len(selections)) and (selection_idx >= 0)):
+                player_idx = selections[selection_idx]
+                return self.players[player_idx].name, player_idx
             else:
                 self.logger.logg("confirm_select fail. player_idx:{0}, len:{1}".format(player_idx, len(selections)), 1)
                 return None,None

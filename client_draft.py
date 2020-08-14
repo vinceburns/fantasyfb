@@ -102,8 +102,7 @@ class KeyboardThread(threading.Thread):
         while True:
             try:
                 uIn = input()
-                if uIn:
-                    self.parse_input(uIn)
+                self.parse_input(uIn)
             except EOFError:
                 _exit(1)
     def wait_server(self):
@@ -159,7 +158,7 @@ class KeyboardThread(threading.Thread):
                 draft.print_info(1)
             else:
                 if uIn.startswith("y:"):
-                    draft.logger.logg("Sorry it is not your turn", 1)
+                    draft.logger.logg("Sorry Incorrect state. Please bring up player menu again.", 1)
                     return
 
                 self.selections = draft.player_fzf(uIn)
