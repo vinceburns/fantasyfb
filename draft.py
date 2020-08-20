@@ -416,6 +416,20 @@ class Draft():
                     self.logger.logg("cant split! {0}".foramt(line), 1)
                     return
         self.sync_draft(selections, 1)
+    def poscnt_print(self):
+        name = "Roster Name"
+        qb   = "QB"
+        rb   = "RB"
+        wr   = "WR"
+        te   = "TE"
+        dst  = "DST"
+        k    = "K"
+        self.logger.logg("------------------------------------------------------------", 1)
+        self.logger.logg("| {0:20} | {1:3} | {2:3} | {3:3} | {4:3} | {5:3} | {6:3} |"\
+                .format(name, qb, rb, wr, te, dst, k), 1)
+        for roster in self.roster:
+            roster.position_cnt()
+        self.logger.logg("------------------------------------------------------------", 1)
 
 def is_fzfmatch(match_str, check_str):
     for match_char in range(0, len(match_str)):

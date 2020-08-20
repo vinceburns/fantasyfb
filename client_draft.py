@@ -138,6 +138,7 @@ class KeyboardThread(threading.Thread):
                 draft.logger.logg("2:<draft_pos> | Show roster for the person at supplied draft position.", 1)
                 draft.logger.logg("5             | Check my starred players.", 1)
                 draft.logger.logg("8             | Show draft information (who is on the clock, when your next turn is, etc.).", 1)
+                draft.logger.logg("9             | Print Roster Position Count Chart", 1)
                 draft.logger.logg("<fuzzyfind>   | Fuzzy find a players name. Ask the creator for definition of fuzzy find if you want to use this feature.", 1)
                 draft.release()
                 return
@@ -166,6 +167,8 @@ class KeyboardThread(threading.Thread):
                 draft.check_starred()
             elif uIn.startswith("8"):
                 draft.print_info(1)
+            elif uIn.startswith("9"):
+                draft.poscnt_print()
             else:
                 if uIn.startswith("y:"):
                     if draft.my_turn():
@@ -201,8 +204,12 @@ class KeyboardThread(threading.Thread):
                 draft.logger.logg("Invalid!", 1)
             self.state = 0
         elif self.state == "Done":
-            print("Draft complete! You can still access rosters with 2 command!")
-            if uIn.startswith("2"):
+            if uIn == "h":
+                draft.logger.logg("Draft Complete!\nInput         | Function ", 1)
+                draft.logger.logg("2             | Show your current roster. ", 1)
+                draft.logger.logg("2:<draft_pos> | Show roster for the person at supplied draft position.", 1)
+                draft.logger.logg("9             | Print Roster Position Count Chart", 1)
+            elif uIn.startswith("2"):
                 roster = draft.user_roster
                 try:
                     position = int(uIn.split(':')[1], 10)
@@ -214,6 +221,8 @@ class KeyboardThread(threading.Thread):
                 except:
                     pass
                 roster.print_roster()
+            elif uIn.startswith("9"):
+                draft.poscnt_print()
         else:
             self.state = 0
         draft.release()

@@ -175,7 +175,8 @@ class KeyboardThread(threading.Thread):
                 draft.logger.logg("6           | roster_addrs", 1)
                 draft.logger.logg("7           | force sync", 1)
                 draft.logger.logg("8           | Print draft info", 1)
-                draft.logger.logg("9           | Enter Test mode", 1)
+                draft.logger.logg("9           | Print Roster Position Count Chart", 1)
+                draft.logger.logg("test        | Enter Test mode", 1)
                 draft.logger.logg("!de:connid  | enable debugging", 1)
                 draft.logger.logg("!dd:connid  | disabling debugging", 1)
                 draft.logger.logg("start fuzzy finding any name to search for a player you would like. See creator for what fuzzy finding means:) (he stole the idea from a vim plugin he uses)", 1)
@@ -224,6 +225,8 @@ class KeyboardThread(threading.Thread):
             elif uIn.startswith("8"):
                 draft.print_info(1)
             elif uIn.startswith("9"):
+                draft.poscnt_print()
+            elif uIn.startswith("test"):
                 self.test = 1
             elif uIn.startswith("!de:"):
                 try:
@@ -258,8 +261,11 @@ class KeyboardThread(threading.Thread):
                 draft_player(self.draft)
             self.state = 0
         elif self.state == "Done":
-            print("Draft complete! You can still access rosters with 2 command!")
-            if uIn.startswith("2"):
+            if uIn == "h":
+                draft.logger.logg("Draft complete help menu!\nInput       | Function", 1)
+                draft.logger.logg("2           | Print Current Roster", 1)
+                draft.logger.logg("9           | Print Roster Position Count Chart", 1)
+            elif uIn.startswith("2"):
                 roster = draft.user_roster
                 try:
                     position = int(uIn.split(':')[1], 10)
@@ -271,6 +277,8 @@ class KeyboardThread(threading.Thread):
                 except:
                     pass
                 roster.print_roster()
+            elif uIn.startswith("9"):
+                draft.poscnt_print()
         else:
             self.state = 0
         self.draft.release()

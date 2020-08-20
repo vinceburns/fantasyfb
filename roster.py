@@ -128,6 +128,29 @@ class Roster():
         player.status = defs.PLAYERSTATUS_BENCH
         self.b_idx += 1
 
+    def position_cnt(self):
+        # name | qb | rb | wr | te | dst | k |
+        qb = 0
+        rb = 0
+        wr = 0
+        te = 0
+        dst = 0
+        k = 0
+        for player in self.player_list:
+            if player.position == defs.PLAYERTYPE_QB:
+                qb += 1
+            elif player.position == defs.PLAYERTYPE_RB:
+                rb += 1
+            elif player.position == defs.PLAYERTYPE_WR:
+                wr += 1
+            elif player.position == defs.PLAYERTYPE_TE:
+                te += 1
+            elif player.position == defs.PLAYERTYPE_DST:
+                dst += 1
+            elif player.position == defs.PLAYERTYPE_KICKER:
+                k += 1
+        self.logger.logg("| {0:20} | {1:<3d} | {2:<3d} | {3:<3d} | {4:<3d} | {5:<3d} | {6:<3d} |"\
+                .format(self.name, qb, rb, wr, te, dst, k), 1)
 
     def print_roster(self):
         self.logger.logg("print_roster", 0)
