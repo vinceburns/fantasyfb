@@ -11,7 +11,7 @@ from player import Player
 import time
 
 send_address = ("192.168.0.106", 7096)
-confirm_selection_str = "It's your turn. Would you like to select one of those players? if so please send y<selection> for example if you want #10 from that list please send 'y:10'\n"
+confirm_selection_str = "It's your turn. Would you like to select one of those players? if so please send y:<selection> for example if you want #10 from that list please send 'y:10'\n"
 
 '''
 Controls received events and decides to send acks.
@@ -40,7 +40,7 @@ class ServerThread(threading.Thread):
             try:
                 data, addr = self.sock.recvfrom(4096)
                 out_string = (strftime("[%H:%M:%S] ",localtime()) + str(data))
-                self.draft.acquire()
+                self.draft.acquire(5)
                 self.draft.logger.logg(out_string, 0)
                 msgs = data.decode().split("|")
                 for msg in msgs:
@@ -118,8 +118,16 @@ class KeyboardThread(threading.Thread):
         return
     def parse_input(self, uIn):
         draft = self.draft
+        if (draft.acquire(5) == False):
+            print("FAILED ACQUIRE!!! GAHHHH!!!")
+            _exit(1)
+        if draft.done == 1:
+            self.state = "Done"
         if len(uIn) == 0:
-            self.state = 0
+            if self.state != "Done":
+                self.state = 0
+            draft.logger.logg("Invalid!", 1)
+            draft.release()
             return
         if self.state == 0:
             if uIn == "h":
@@ -131,6 +139,7 @@ class KeyboardThread(threading.Thread):
                 draft.logger.logg("5             | Check my starred players.", 1)
                 draft.logger.logg("8             | Show draft information (who is on the clock, when your next turn is, etc.).", 1)
                 draft.logger.logg("<fuzzyfind>   | Fuzzy find a players name. Ask the creator for definition of fuzzy find if you want to use this feature.", 1)
+                draft.release()
                 return
             elif uIn.startswith("1"):
                 try:
@@ -147,6 +156,7 @@ class KeyboardThread(threading.Thread):
                     position = int(uIn.split(':')[1], 10)
                     if position >= draft.n_rosters + 1:
                         draft.logger.logg("Invalid roster position", 1)
+                        draft.release()
                         return
                     roster = draft.roster[position - 1]
                 except:
@@ -158,11 +168,17 @@ class KeyboardThread(threading.Thread):
                 draft.print_info(1)
             else:
                 if uIn.startswith("y:"):
-                    draft.logger.logg("Sorry Incorrect state. Please bring up player menu again.", 1)
+                    if draft.my_turn():
+                        draft.logger.logg("Sorry Incorrect state. Please bring up player menu again.", 1)
+                    else:
+                        draft.logger.logg("Sorry it is not your turn!", 1)
+
+                    draft.release()
                     return
 
                 self.selections = draft.player_fzf(uIn)
                 if (len(self.selections) == 0):
+                    draft.release()
                     return
                 if draft.my_turn():
                     draft.logger.logg(confirm_selection_str, 1)
@@ -177,11 +193,30 @@ class KeyboardThread(threading.Thread):
                     data = self.rxqueue.get()
                 self.send_server("draft_player,p_name={0},p_rank={1}".format(name, self.draft.players[player_idx].rank))
                 while ((self.synced == 0) and (self.pick_outcome == 0)):
+                    draft.release()
                     self.wait_server()
+                    draft.acquire(5)
                 draft.logger.logg("turn complete", 0)
+            else:
+                draft.logger.logg("Invalid!", 1)
             self.state = 0
+        elif self.state == "Done":
+            print("Draft complete! You can still access rosters with 2 command!")
+            if uIn.startswith("2"):
+                roster = draft.user_roster
+                try:
+                    position = int(uIn.split(':')[1], 10)
+                    if position >= draft.n_rosters + 1:
+                        draft.logger.logg("Invalid roster position", 1)
+                        self.draft.release()
+                        return
+                    roster = draft.roster[position - 1]
+                except:
+                    pass
+                roster.print_roster()
         else:
             self.state = 0
+        draft.release()
         return 
 
     def send_server(self, msg):

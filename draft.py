@@ -13,6 +13,7 @@ class Draft():
     def __init__(self, position, name, players, n_players, player_csv, load=None):
         self.roster = []
         self.mutex = threading.Lock()
+        self.cond = threading.Condition(threading.Lock()) 
         self.players = players
         self.starred_players = []
         for player in self.players:
@@ -55,11 +56,27 @@ class Draft():
         self.current_roster = self.roster[0]
         self.remaining_picks = (self.n_rosters * self.roster[0].max_players)
 
-    def acquire(self):
-        self.mutex.acquire()
+    def acquire(self, timeout):
+        cond = self.cond
+        with cond:
+            if timeout is not None:
+                current_time = start_time = time.time()
+                while (current_time < start_time + timeout):
+                    if self.mutex.acquire(False):
+                        return True
+                    else:
+                        self.cond.wait(timeout - (time.time() - start_time))
+                        current_time = time.time()
+                return False
+            else:
+                self.mutex.acquire(True)
+        return
 
     def release(self):
-        self.mutex.release()
+        cond = self.cond
+        with cond:
+            self.mutex.release()
+            self.cond.notify()
 
     def my_turn(self):
         if self.current_roster == self.user_roster:
@@ -220,8 +237,6 @@ class Draft():
             self.rd_pick = 0
             self.round += 1
         self.current_roster.fill_in(is_last)
-        if (self.remaining_picks == 0):
-            self.done = 1
 
         roster_idx = self.rd_pick
         if self.round % 2 != 0:
@@ -230,19 +245,15 @@ class Draft():
         self.current_roster = self.roster[roster_idx]
         self.logger.logg("Round:{0}, Pick:{1}, Team:{2}, Total_Picks:{3}, Remaining_Picks:{4}(per team:{5})".format((self.round + 1), (self.rd_pick + 1), self.current_roster.name, (self.total_pick - 1), self.remaining_picks, round(self.remaining_picks/self.n_rosters)), is_last)
         if (is_last == 1):
-            if self.my_turn():
-                self.logger.logg("You are on the Clock!!!!", 1)
-            else:
-                self.print_info(0)
             with open(self.picklogger, 'w') as f:
                 the_round = 0
                 rd_pick = 0
                 total_pick = 1
                 roster_idx = 0
+                output = ""
                 for i in range(0, len(self.selections)):
                     #pick | @todo roster_idx | player rank
-
-                    f.write("%d|%d|%d\n"%((i +1), roster_idx, self.selections[i]))
+                    output += ("%d|%d|%d\n"%((i +1), roster_idx, self.selections[i]))
                     total_pick += 1
                     rd_pick += 1
                     if (rd_pick == self.n_rosters):
@@ -252,6 +263,17 @@ class Draft():
                     if the_round % 2 != 0:
                         #going down the snake. or should i say snek
                         roster_idx = ((self.n_rosters-1) - rd_pick)
+                f.write(output)
+
+            if (self.remaining_picks == 0):
+                self.logger.logg("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\r\n\r\nDRAFT COMPLETE!\r\n\r\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", is_last)
+                self.done = 1
+            else:
+                if self.my_turn():
+                    self.logger.logg("You are on the Clock!!!!", 1)
+                else:
+                    self.print_info(0)
+                    self.logger.logg("{0} is on the Clock!!!!".format(self.current_roster.name), 1)
 
     def confirm_selection(self, selections, uIn):
         if selections == None:

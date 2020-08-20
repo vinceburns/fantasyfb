@@ -13,7 +13,7 @@ import time
 #@note (vburns) this will only work on a windows machine currently due to the winsound requirement
 
 send_address = ("192.168.0.106", 7096)
-confirm_selection_str = "It's your turn. Would you like to select one of those players? if so please send y<selection> for example if you want #10 from that list please send 'y:10'\n"
+confirm_selection_str = "It's your turn. Would you like to select one of those players? if so please send y:<selection> for example if you want #10 from that list please send 'y:10'\n"
 
 '''
 Controls received events and decides to send acks.
@@ -59,7 +59,6 @@ class ClientThread(threading.Thread):
                 self.error += 1
                 if self.error == 20:
                     print("THREAD DIED")
-
                     return
             except Exception as ex:
                 template = "An exception of type {0} occurred. Arguments:\n{1!r}"
@@ -72,20 +71,18 @@ class ClientThread(threading.Thread):
             # print("Recv process time:{0}".format(time.time()-self.ts))
     def handle_msg(self, splitter):
         if (splitter[0] == "draft_player"):
-            print(self.draft.current_roster.name, self.roster.name) 
             if ((self.draft.current_roster.name == self.roster.name)):
-                print(splitter[1], splitter[2]) 
                 if (splitter[1].startswith("p_name=") and splitter[2].startswith("p_rank=")):
                     p_name = splitter[1].split("=",1)[1]
                     p_rank = int(splitter[2].split("=",1)[1], 10)
                     player_idx = 0
                     for player in self.draft.players:
                         if player.name == p_name and player.rank == p_rank:
-                            self.draft.acquire()
+                            self.draft.acquire(5)
                             self.draft.draft_player(player_idx, 1)
-                            self.draft.release()
                             self.sock.sendall("draftack|".encode())
                             draft_player(self.draft)
+                            self.draft.release()
                             return
                         player_idx += 1
                     self.sock.sendall("error|".encode())
@@ -137,21 +134,35 @@ class KeyboardThread(threading.Thread):
         self.state = 0
         self.synced = 0
         self.selected = 0
+        self.test = 0
         self.pick_outcome = 0
         self.selections = []
 
     def run(self):
         while True:
             try:
-                uIn = input()
-                self.ts = time.time()
+                if self.test == 1:
+                    if self.state == 0:
+                        uIn = "1"
+                    else:
+                        uIn = "y:1"
+                else:
+                    uIn = input()
                 self.parse_input(uIn)
             except EOFError:
                 _exit(1)
     def parse_input(self, uIn):
         draft = self.draft
+        if (draft.acquire(5) == False):
+            print("FAILED ACQUIRE!!! GAHHHH!!!")
+            _exit(1)
+
+        if draft.done == 1:
+            self.state = "Done"
+            self.test = 0
         if len(uIn) == 0:
             self.state = 0
+            self.draft.release()
             return
         if self.state == 0:
             if uIn == "h":
@@ -164,9 +175,11 @@ class KeyboardThread(threading.Thread):
                 draft.logger.logg("6           | roster_addrs", 1)
                 draft.logger.logg("7           | force sync", 1)
                 draft.logger.logg("8           | Print draft info", 1)
+                draft.logger.logg("9           | Enter Test mode", 1)
                 draft.logger.logg("!de:connid  | enable debugging", 1)
                 draft.logger.logg("!dd:connid  | disabling debugging", 1)
                 draft.logger.logg("start fuzzy finding any name to search for a player you would like. See creator for what fuzzy finding means:) (he stole the idea from a vim plugin he uses)", 1)
+                self.draft.release()
                 return
             elif uIn.startswith("1"):
                 override = 0
@@ -188,6 +201,7 @@ class KeyboardThread(threading.Thread):
                     position = int(uIn.split(':')[1], 10)
                     if position >= draft.n_rosters + 1:
                         draft.logger.logg("Invalid roster position", 1)
+                        self.draft.release()
                         return
                     roster = draft.roster[position - 1]
                 except:
@@ -209,6 +223,8 @@ class KeyboardThread(threading.Thread):
                 sync_up(self.draft)
             elif uIn.startswith("8"):
                 draft.print_info(1)
+            elif uIn.startswith("9"):
+                self.test = 1
             elif uIn.startswith("!de:"):
                 try:
                     idx = int(uIn.split(":", 1)[1], 10)
@@ -216,6 +232,7 @@ class KeyboardThread(threading.Thread):
                         conn_threads[idx].debug = 1
                         draft.logger.logg("Enabling {0}'s debugs!".format(conn_threads[idx].name), 1)
                 except:
+                    self.draft.release()
                     return
             elif uIn.startswith("!dd:"):
                 try:
@@ -224,10 +241,12 @@ class KeyboardThread(threading.Thread):
                         conn_threads[idx].debug = 0
                         draft.logger.logg("Disabling {0}'s debugs!".format(conn_threads[idx].name), 1)
                 except:
+                    self.draft.release()
                     return
             else:
                 self.selections = draft.player_fzf(uIn)
                 if (len(self.selections) == 0):
+                    self.draft.release()
                     return
                 if ((draft.current_roster.addr == None) or override):
                     draft.logger.logg(confirm_selection_str, 1)
@@ -235,13 +254,26 @@ class KeyboardThread(threading.Thread):
         elif self.state == "confirm_selections":
             name, player_idx = draft.confirm_selection(self.selections, uIn)
             if (name != None) and (player_idx != None):
-                self.draft.acquire()
                 self.draft.draft_player(player_idx, 1)
-                self.draft.release()
                 draft_player(self.draft)
             self.state = 0
+        elif self.state == "Done":
+            print("Draft complete! You can still access rosters with 2 command!")
+            if uIn.startswith("2"):
+                roster = draft.user_roster
+                try:
+                    position = int(uIn.split(':')[1], 10)
+                    if position >= draft.n_rosters + 1:
+                        draft.logger.logg("Invalid roster position", 1)
+                        self.draft.release()
+                        return
+                    roster = draft.roster[position - 1]
+                except:
+                    pass
+                roster.print_roster()
         else:
             self.state = 0
+        self.draft.release()
         return 
 
 def sync_up(draft):
@@ -355,6 +387,7 @@ def main():
 
     keyboard_rxqueue = Queue()
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.settimeout(5) 
     sock.bind(('',port))
     sock.listen(1)
 
@@ -362,18 +395,20 @@ def main():
 
     key_thr.start()
     while True:
-        conn, addr = sock.accept()
-        draft.logger.logg("New conn! addr:{0}".format(addr), 1)
-        q = Queue()
-        conn.settimeout(5)
-        new_thread = ClientThread(conn, keyboard_rxqueue, q, draft, addr, len(conn_threads))
-        new_thread.start()
+        try:
+            conn, addr = sock.accept()
+            draft.logger.logg("New conn! addr:{0}".format(addr), 1)
+            q = Queue()
+            conn.settimeout(5)
+            new_thread = ClientThread(conn, keyboard_rxqueue, q, draft, addr, len(conn_threads))
+            new_thread.start()
 
-        conn_threads.append(new_thread)
+            conn_threads.append(new_thread)
+        except socket.timeout:
+            pass
         i = 0
         deleted = 0
 
-        print("hello")
         while (i < len(conn_threads)):
             if (conn_threads[i].is_alive() == False):
                 draft.logger.logg("Dead Thread {0}".format(addr), 1)
@@ -385,6 +420,7 @@ def main():
             while (i < len(conn_threads)):
                 conn_threads[i].index = i
         if (key_thr.is_alive() == False):
+            print("Keyboard Thread Died!!")
             _exit(1)
 
         time.sleep(1)
