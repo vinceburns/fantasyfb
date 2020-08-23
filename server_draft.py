@@ -22,6 +22,28 @@ conn_threads = []
 key_thr = None
 debug = 0
 
+class TimerThread(threading.Thread):
+    def __init__(self, draft):
+        threading.Thread.__init__(self)
+        self.draft = draft
+        self.warning = 0
+
+    def run(self):
+        while True:
+            if self.draft.started == 1:
+                current_counter = (time.time() - self.draft.turn_ts)
+                if ((current_counter >= 120) and (self.warning != 2)):
+                    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\r\n\r\n{0} has been on the clock for {1} seconds!\r\n\r\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!".format(self.draft.current_roster.name, int(current_counter)))
+                    self.warning = 2
+                elif ((current_counter >= 60) and (self.warning == 0)):
+                    print("{0} has been on the clock for {1} seconds!".format(self.draft.current_roster.name, int(current_counter)))
+                    self.warning = 1
+                elif (current_counter <= 10):
+                    #assume a pick happend and reset warning state
+                    self.warning = 0
+            time.sleep(1)
+
+
 class ClientThread(threading.Thread):
     def __init__(self, conn, keyqueue, txqueue, draft, addr, index):
         threading.Thread.__init__(self)
@@ -192,6 +214,8 @@ class KeyboardThread(threading.Thread):
                         pass
                 except:
                     position = None
+                if draft.started == 0:
+                    draft.start_draft()
                 self.selections = draft.show_topavail(position)
                 if ((draft.current_roster.addr == None) or override):
                     draft.logger.logg(confirm_selection_str, 1)
@@ -291,6 +315,7 @@ def sync_up(draft):
             sync_str += ",{0}".format(draft.selections[i])
         for t in conn_threads:
             if (t.is_alive()):
+                print(sync_str)
                 t.txqueue.put_nowait(sync_str)
             else:
                 pass
@@ -400,8 +425,10 @@ def main():
     sock.listen(1)
 
     key_thr = KeyboardThread(draft, keyboard_rxqueue)
+    timer_thread = TimerThread(draft)
 
     key_thr.start()
+    timer_thread.start()
     while True:
         try:
             conn, addr = sock.accept()

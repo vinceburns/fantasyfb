@@ -30,7 +30,10 @@ class Roster():
         for i in range(0, self.max_players):
             self.sorted_playerlist.append(dummy)
         self.addr = None
-    def fill_in(self, do_print, player):
+        self.total_time = 0
+
+    def fill_in(self, do_print, player, turn_time = 0):
+        self.total_time += turn_time
         self.player_list.append(player)
         self.logger.logg("fill_in", 0)
         self.b_idx = defs.PLAYERSTATUS_BENCH
@@ -130,7 +133,7 @@ class Roster():
         self.b_idx += 1
 
     def position_cnt(self):
-        # name | qb | rb | wr | te | dst | k |
+        # name | qb | rb | wr | te | dst | k | pick_time
         qb = 0
         rb = 0
         wr = 0
@@ -150,8 +153,8 @@ class Roster():
                 dst += 1
             elif player.position == defs.PLAYERTYPE_KICKER:
                 k += 1
-        self.logger.logg("| {0:20} | {1:<3d} | {2:<3d} | {3:<3d} | {4:<3d} | {5:<3d} | {6:<3d} |"\
-                .format(self.name, qb, rb, wr, te, dst, k), 1)
+        self.logger.logg("| {0:20} | {1:<3d} | {2:<3d} | {3:<3d} | {4:<3d} | {5:<3d} | {6:<3d} | {7:9} |"\
+                .format(self.name, qb, rb, wr, te, dst, k, int(self.total_time)), 1)
 
     def print_roster(self):
         self.logger.logg("print_roster", 0)

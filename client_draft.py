@@ -17,6 +17,27 @@ confirm_selection_str = "It's your turn. Would you like to select one of those p
 Controls received events and decides to send acks.
 '''
 
+class TimerThread(threading.Thread):
+    def __init__(self, draft):
+        threading.Thread.__init__(self)
+        self.draft = draft
+        self.warning = 0
+
+    def run(self):
+        while True:
+            if (self.draft.started == 1):
+                current_counter = (time.time() - self.draft.turn_ts)
+                if ((current_counter >= 120) and (self.warning != 2) and self.draft.my_turn()):
+                    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\r\n\r\nYou have been on the clock for {0} seconds!\r\n\r\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!".format(int(current_counter)))
+                    self.warning = 2
+                elif ((current_counter >= 60) and (self.warning == 0) and self.draft.my_turn()):
+                    print("You have been on the clock for {0} seconds!".format(int(current_counter)))
+                    self.warning = 1
+                elif (current_counter <= 10):
+                    #assume a pick happend and reset warning state
+                    self.warning = 0
+            time.sleep(1)
+
 class ServerThread(threading.Thread):
     def __init__(self, port, keyqueue, txqueue, draft, server_addr):
         threading.Thread.__init__(self)
@@ -47,9 +68,12 @@ class ServerThread(threading.Thread):
                     splitter = msg.split(",")
                     if splitter[0] == "sync":
                         selections = []
+                        times = []
                         for i in range(1, len(splitter)):
                             selections.append(int(splitter[i]))
-                        self.draft.sync_draft(selections, 0)
+                            #the times already mismatch across server client. for now we must trust the server
+                            times.append(1)
+                        self.draft.sync_draft(selections, times, 0)
                         self.keyqueue.put("sync")
                     if splitter[0] == "roster_names":
                         names = []
@@ -147,6 +171,8 @@ class KeyboardThread(threading.Thread):
                     position = uIn.split(':')[1]
                 except:
                     position = None
+                if draft.started == 0:
+                    draft.start_draft()
                 self.selections = draft.show_topavail(position)
                 if draft.my_turn():
                     draft.logger.logg(confirm_selection_str, 1)
@@ -168,6 +194,7 @@ class KeyboardThread(threading.Thread):
             elif uIn.startswith("8"):
                 draft.print_info(1)
             elif uIn.startswith("9"):
+                print("Please note the times here are not accurate. Please refer to server for this feature")
                 draft.poscnt_print()
             else:
                 if uIn.startswith("y:"):
@@ -315,8 +342,10 @@ def main():
 
     threadpool.append(server_thr)
     key_thr = KeyboardThread(draft, txqueue, keyboard_rxqueue)
+    timer_thr = TimerThread(draft)
 
     threadpool.append(key_thr)
+    threadpool.append(timer_thr)
 
     for t in threadpool:
         t.start()
