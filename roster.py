@@ -30,7 +30,8 @@ class Roster():
         for i in range(0, self.max_players):
             self.sorted_playerlist.append(dummy)
         self.addr = None
-    def fill_in(self, do_print):
+    def fill_in(self, do_print, player):
+        self.player_list.append(player)
         self.logger.logg("fill_in", 0)
         self.b_idx = defs.PLAYERSTATUS_BENCH
         dummy = "Empty"

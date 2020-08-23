@@ -224,7 +224,7 @@ class Draft():
         self.players[player_idx].pick = self.rd_pick + 1
         self.players[player_idx].overallpick = self.total_pick
         self.selections.append(self.players[player_idx].rank)
-        self.current_roster.player_list.append(self.players[player_idx])
+        self.current_roster.fill_in(is_last, self.players[player_idx])
         for i in range(0, len(self.starred_players)):
             if (self.players[player_idx].rank == self.starred_players[i].rank):
                 del self.starred_players[i]
@@ -236,7 +236,6 @@ class Draft():
         if (self.rd_pick == self.n_rosters):
             self.rd_pick = 0
             self.round += 1
-        self.current_roster.fill_in(is_last)
 
         roster_idx = self.rd_pick
         if self.round % 2 != 0:
