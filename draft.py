@@ -89,7 +89,6 @@ class Draft():
         with open(self.picklogger, 'r') as f:
             picks = f.readlines()
         picks.pop()
-        output = ''
         with open(self.picklogger, 'w') as f:
             for pick in picks:
                 f.write(pick)
@@ -301,13 +300,16 @@ class Draft():
                     player_idx = i
                     break;
             if (player_idx == len(self.players)):
-                self.logger.logg("invalid player selection", 1)
+                self.logger.logg("invalid player selection {0}".format(selections[self.total_pick-1]), 1)
                 sys.exit(2)
 
-            self.draft_player(player_idx, is_last, pick_times[self.total_pick-1])
+            self.draft_player(player_idx, 0, pick_times[self.total_pick-1])
         self.logger.logg("Round:{0} Round pick:{2} roster:{1} total picks:{3}".format((self.round + 1), self.current_roster.name, (self.rd_pick + 1), (self.total_pick - 1)), 1)
         if self.my_turn():
             self.logger.logg("You are on the Clock!!!!", 1)
+        else:
+            self.print_info(0)
+            self.logger.logg("{0} is on the Clock!!!!".format(self.current_roster.name), 1)
         return True
 
     def print_info(self, header):
@@ -404,7 +406,7 @@ class Draft():
                     self.logger.logg("cant split! {0}".foramt(line), 1)
                     return
                 times.append(int(line.split("|")[3], 10))
-        print(times)
+        print(selections,times)
         self.sync_draft(selections, times, 1)
 
     def start_draft(self):
