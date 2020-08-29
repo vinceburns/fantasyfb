@@ -386,28 +386,31 @@ class Draft():
         return return_list
 
     def resume_draft(self, file_name):
-        self.round = 0
-        self.rd_pick = 0
-        self.total_pick = 1
-        self.selections = []
-        self.current_roster = self.roster[0]
-        self.remaining_picks = (self.n_rosters * self.roster[0].max_players)
-        for roster in self.roster:
-            roster.total_time = 0
+        try:
+            with open(file_name, 'r') as f:
+                self.round = 0
+                self.rd_pick = 0
+                self.total_pick = 1
+                self.selections = []
+                self.current_roster = self.roster[0]
+                self.remaining_picks = (self.n_rosters * self.roster[0].max_players)
+                for roster in self.roster:
+                    roster.total_time = 0
 
-        selections = []
-        times = []
-        with open(file_name, 'r') as f:
-            for line in f:
-                #pick | roster_idx | player rank | pick time
-                try:
-                    selections.append(int(line.split("|")[2], 10))
-                except:
-                    self.logger.logg("cant split! {0}".foramt(line), 1)
-                    return
-                times.append(int(line.split("|")[3], 10))
-        print(selections,times)
-        self.sync_draft(selections, times, 1)
+                selections = []
+                times = []
+                for line in f:
+                    #pick | roster_idx | player rank | pick time
+                    try:
+                        selections.append(int(line.split("|")[2], 10))
+                    except:
+                        self.logger.logg("cant split! {0}".foramt(line), 1)
+                        return
+                    times.append(int(line.split("|")[3], 10))
+            print(selections,times)
+            self.sync_draft(selections, times, 1)
+        except FileNotFoundError:
+            print("Invalid File!")
 
     def start_draft(self):
         self.turn_ts = time.time()
