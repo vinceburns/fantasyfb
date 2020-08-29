@@ -284,7 +284,7 @@ def player_generate_fromcsv(line):
     except:
         bye = 0
     try:
-        adp = lis[11].split('.')[0]
+        lis[11] = lis[11].split('.')[0]
     except IndexError:
         #unlucky see if it is not a float
         pass
