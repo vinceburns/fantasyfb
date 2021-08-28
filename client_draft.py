@@ -262,39 +262,39 @@ class KeyboardThread(threading.Thread):
 def player_generate_fromcsv(line):
     if line == "":
         return None
-    lis = line.replace("\"", "").split(",")
+    lis = line.strip().split(",")
+    for idx in range(0, len(lis)):
+        lis[idx] = lis[idx].replace("\"", "").replace("\n", "")
+    rank = int(lis[0], 10)
     try:
-        rank = int(lis[0], 10)
-    except:
-        return
-    try:
-        position = lis[5]
+        position = lis[4]
         uppers = [l for l in position if l.isupper()]
         position = "".join(uppers)
         while (len(position) < 3):
             position += " "
     except:
+        print("position")
         return
-    name = lis[3]
-    team = lis[4]
+    name = lis[1]
+    team = lis[2]
     while (len(team) < 3):
         team += " "
     try:
-        bye = int(lis[6], 10)
+        bye = int(lis[3], 10)
     except:
         bye = 0
     try:
-        lis[11] = lis[11].split('.')[0]
+        lis[9] = lis[9].split('.')[0]
     except IndexError:
         #unlucky see if it is not a float
         pass
     try:
-        adp = int(lis[11], 10)
+        adp = int(lis[9], 10)
     except ValueError:
         adp = "No data"
     if len(lis) >= 14:
         try:
-            starred = int(lis[13], 10)
+            starred = int(lis[10], 10)
         except ValueError:
             starred = 0
     else:
