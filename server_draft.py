@@ -362,7 +362,6 @@ def player_generate_fromcsv(line):
         adp = rank + adp_diff
     except:
         adp = rank
-    print(f"pos:{position} rank:{rank} name:{name} team:{team} bye:{bye} adp:{adp}")
     player = Player(position, rank, name, team, bye, adp, starred)
     return player
 
@@ -403,7 +402,6 @@ def main():
         for line in f:
             if count > 180:
                 break
-            print(count)
             player = player_generate_fromcsv(line)
             if player != None:
                 players.append(player)
@@ -416,6 +414,7 @@ def main():
             draft.roster[i].name = names[i]
 
     keyboard_rxqueue = Queue()
+    print(f"port:{port}")
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.settimeout(5) 
     sock.bind(('',port))
@@ -437,6 +436,7 @@ def main():
 
             conn_threads.append(new_thread)
         except socket.timeout:
+            print("timeout")
             pass
         i = 0
         deleted = 0

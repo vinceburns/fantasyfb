@@ -47,6 +47,7 @@ class ServerThread(threading.Thread):
         self.draft = draft
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        print(f"connect{server_addr}")
         self.sock.connect(server_addr)
         self.sock.settimeout(1)
         out_string = "Socket open on {}! Listening...".format(port)
