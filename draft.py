@@ -188,7 +188,7 @@ class Draft():
         while (len(name_str) < self.maxnamelen):
             name_str += " "
         out_strin += name_str
-        out_strin += " | Pos | Rank | Team | ADP | Bye |" 
+        out_strin += " | Pos | Rank | Team | ADP | Bye | tier | SOS  | posrnk" 
         self.logger.logg(out_strin, 1)
         count = 0
         printer = ''

@@ -6,9 +6,13 @@ import draftlogging
 from defines import Defines as defs
 
 class Player():
-    def __init__(self, position, rank, name, team, bye, adp, stared):
+    def __init__(self, position, rank, name, team, bye, adp, stared, posrank, tier, sos):
         self.position = position
         self.rank = rank
+        self.posrank = posrank
+        self.tier = tier
+        self.sos = sos
+        self.tier = tier
         self.name = name
         self.team = team
         self.bye = bye
@@ -35,6 +39,9 @@ class Player():
         except:
             out_strin += "err |"
         out_strin += "%02d  | "%(self.bye)
+        out_strin += "%02d   | "%(self.tier)
+        out_strin += "%d/5  |"%(self.sos)
+        out_strin += "%s"%(self.posrank)
         return out_strin
 
 if __name__ == '__main__':
