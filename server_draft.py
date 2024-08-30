@@ -362,6 +362,7 @@ def player_generate_fromcsv(line):
         adp = rank + adp_diff
     except:
         adp = rank
+    print(f"adding:{name}")
     player = Player(position, rank, name, team, bye, adp, starred)
     return player
 
@@ -400,12 +401,16 @@ def main():
         count = 0
         f.__next__()
         for line in f:
+            if count < 10:
+                print(line)
             if count > 180:
                 break
             player = player_generate_fromcsv(line)
             if player != None:
                 players.append(player)
                 count += 1
+            else:
+                print(error)
 
 
     draft = Draft(position, user_name, players, n_rosters, player_csv)
@@ -436,7 +441,6 @@ def main():
 
             conn_threads.append(new_thread)
         except socket.timeout:
-            print("timeout")
             pass
         i = 0
         deleted = 0
