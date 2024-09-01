@@ -265,6 +265,7 @@ def player_generate_fromcsv(line):
     if line == "":
         return None
     lis = line.strip().split(",")
+    print(lis)
     
     for idx in range(0, len(lis)):
         lis[idx] = lis[idx].replace("\"", "").replace("\n", "")
@@ -283,7 +284,7 @@ def player_generate_fromcsv(line):
     while (len(team) < 3):
         team += " "
     try:
-        bye = int(lis[3], 10)
+        bye = int(lis[5], 10)
     except:
         bye = 0
     try:
@@ -291,8 +292,19 @@ def player_generate_fromcsv(line):
         adp = rank + adp_diff
     except:
         adp = rank
-    print(f"pos:{position} rank:{rank} name:{name} team:{team} bye:{bye} adp:{adp}")
-    player = Player(position, rank, name, team, bye, adp, starred)
+    try:
+        sos = int(lis[6][0])
+    except:
+        sos = 0
+    try:
+        posrank = lis[4]
+    except:
+        posrank = "unk"
+    try:
+        tier = int(lis[1])
+    except:
+        tier = 0
+    player = Player(position, rank, name, team, bye, adp, starred, posrank, tier, sos)
     return player
 
 
