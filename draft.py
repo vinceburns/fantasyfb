@@ -171,7 +171,7 @@ class Draft():
                 filterlist.append(defs.PLAYERTYPE_WR)
             elif desired in defs.PLAYERTYPE_TE:
                 filterlist.append(defs.PLAYERTYPE_TE)
-            elif desired in "flex ":
+            elif desired in "FLEX ":
                 filterlist.append(defs.PLAYERTYPE_RB)
                 filterlist.append(defs.PLAYERTYPE_WR)
                 filterlist.append(defs.PLAYERTYPE_TE)
@@ -300,8 +300,8 @@ class Draft():
                     player_idx = i
                     break;
             if (player_idx == len(self.players)):
-                self.logger.logg("invalid player selection {0}".format(selections[self.total_pick-1]), 1)
-                sys.exit(2)
+                self.logger.logg("invalid player selection {0} - aborting playback".format(selections[self.total_pick-1]), 1)
+                return False
 
             self.draft_player(player_idx, 0, pick_times[self.total_pick-1])
         self.logger.logg("Round:{0} Round pick:{2} roster:{1} total picks:{3}".format((self.round + 1), self.current_roster.name, (self.rd_pick + 1), (self.total_pick - 1)), 1)
@@ -401,16 +401,21 @@ class Draft():
                 times = []
                 for line in f:
                     #pick | roster_idx | player rank | pick time
+                    if line.strip() == "":
+                        continue
+                    fields = line.split("|")
                     try:
-                        selections.append(int(line.split("|")[2], 10))
-                    except:
-                        self.logger.logg("cant split! {0}".foramt(line), 1)
-                        return
-                    times.append(int(line.split("|")[3], 10))
-            print(selections,times)
-            self.sync_draft(selections, times, 1)
+                        rank = int(fields[2], 10)
+                        pick_time = int(fields[3], 10)
+                    except (IndexError, ValueError):
+                        self.logger.logg("cant split! {0}".format(line), 1)
+                        return False
+                    selections.append(rank)
+                    times.append(pick_time)
+            return self.sync_draft(selections, times, 1)
         except FileNotFoundError:
-            print("Invalid File!")
+            self.logger.logg("Invalid File! {0}".format(file_name), 1)
+            return False
 
     def start_draft(self):
         self.turn_ts = time.time()

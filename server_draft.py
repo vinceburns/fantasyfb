@@ -9,6 +9,7 @@ from draft import Draft
 from roster import Roster
 from player import Player
 import time
+import csv
 
 #@note (vburns) this will only work on a windows machine currently due to the winsound requirement
 
@@ -236,7 +237,12 @@ class KeyboardThread(threading.Thread):
                 self.draft.revert_pick()
                 sync_up(self.draft)
             elif uIn.startswith("4"):
-                file_name = uIn.split(':')[1]
+                try:
+                    file_name = uIn.split(':')[1]
+                except IndexError:
+                    draft.logger.logg("usage: 4:<pick log file>", 1)
+                    self.draft.release()
+                    return
                 draft.resume_draft(file_name)
                 sync_up(self.draft)
             elif uIn.startswith("5"):
@@ -331,49 +337,72 @@ def draft_player(draft):
                 pass
 
 
-def player_generate_fromcsv(line):
+# FantasyPros changes the export layout between seasons: the 2026 file inserts
+# UPSIDE and BUST between BYE WEEK and SOS SEASON, so fixed column indexes read
+# the wrong fields. Resolve every column by its header name instead.
+CSV_HEADERS = {
+    "rank":    "RK",
+    "tier":    "TIERS",
+    "name":    "PLAYER NAME",
+    "team":    "TEAM",
+    "posrank": "POS",
+    "bye":     "BYE WEEK",
+    "sos":     "SOS SEASON",
+    "adp":     "ECR VS. ADP",
+}
+
+def csv_columns(header):
+    fields = [f.strip().upper() for f in next(csv.reader([header]))]
+    cols = {}
+    for key, title in CSV_HEADERS.items():
+        if title in fields:
+            cols[key] = fields.index(title)
+    return cols
+
+def player_generate_fromcsv(line, cols):
     starred = 0
-    if line == "":
+    if line.strip() == "":
         return None
-    lis = line.strip().split(",")
-    print(lis)
-    
-    for idx in range(0, len(lis)):
-        lis[idx] = lis[idx].replace("\"", "").replace("\n", "")
-    rank = int(lis[0], 10)
+    lis = [f.strip() for f in next(csv.reader([line.strip()]))]
+
+    def field(key, default=""):
+        idx = cols.get(key)
+        if idx is None or idx >= len(lis):
+            return default
+        return lis[idx]
+
     try:
-        position = lis[4]
-        uppers = [l for l in position if l.isupper()]
-        position = "".join(uppers)
-        while (len(position) < 3):
-            position += " "
-    except:
+        rank = int(field("rank"), 10)
+    except ValueError:
+        # tier separator rows carry an empty RK and no player data
+        return None
+    posrank = field("posrank", "unk")
+    position = "".join([l for l in posrank if l.isupper()])
+    if position == "":
         print("position")
-        return
-    name = lis[2]
-    team = lis[3]
+        return None
+    while (len(position) < 3):
+        position += " "
+    name = field("name")
+    team = field("team")
     while (len(team) < 3):
         team += " "
     try:
-        bye = int(lis[5], 10)
-    except:
+        bye = int(field("bye"), 10)
+    except ValueError:
         bye = 0
     try:
-        adp_diff = int(lis[7], 10)
-        adp = rank + adp_diff
-    except:
+        # ECR VS. ADP is a signed delta ("+3", "-11") or "-" when unranked
+        adp = rank + int(field("adp"), 10)
+    except ValueError:
         adp = rank
     try:
-        sos = int(lis[6][0])
-    except:
+        sos = int(field("sos")[0])
+    except (ValueError, IndexError):
         sos = 0
     try:
-        posrank = lis[4]
-    except:
-        posrank = "unk"
-    try:
-        tier = int(lis[1])
-    except:
+        tier = int(field("tier"), 10)
+    except ValueError:
         tier = 0
     player = Player(position, rank, name, team, bye, adp, starred, posrank, tier, sos)
     return player
@@ -411,18 +440,14 @@ def main():
 
     with open(player_csv,'r') as f:
         count = 0
-        f.__next__()
+        cols = csv_columns(f.__next__())
         for line in f:
-            if count < 10:
-                print(line)
-            if count > 180:
-                break
-            player = player_generate_fromcsv(line)
+            player = player_generate_fromcsv(line, cols)
             if player != None:
                 players.append(player)
                 count += 1
-            else:
-                print(error)
+            elif line.strip() != "":
+                print(f"skipping row: {line.strip()}")
 
 
     draft = Draft(position, user_name, players, n_rosters, player_csv)
